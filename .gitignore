@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Generated images and local request metadata
+artifacts/*
+!artifacts/.gitkeep
+*.request.json
+
+# Secrets must only come from environment variables or CC-Switch.
+.env
+.env.*
+!.env.example

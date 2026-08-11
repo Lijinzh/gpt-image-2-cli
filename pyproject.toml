@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gpt-image-2-cli"
+version = "0.1.0"
+description = "Reliable CLI for GPT-Image models through OpenAI-compatible relay APIs and CC-Switch."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Lijinzh" }]
+keywords = ["gpt-image", "image-generation", "cli", "cc-switch", "openai-compatible"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+  "httpx>=0.28.1,<1",
+  "pillow>=11.3.0,<13",
+]
+
+[project.scripts]
+gpt-image = "gpt_image_cli.cli:main"
+
+[project.urls]
+Repository = "https://github.com/Lijinzh/gpt-image-2-cli"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.4.1,<9",
+  "ruff>=0.12.7,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gpt_image_cli"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

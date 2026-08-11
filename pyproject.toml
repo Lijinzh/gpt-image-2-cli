@@ -30,6 +30,7 @@ gpt-image = "gpt_image_cli.cli:main"
 
 [project.urls]
 Repository = "https://github.com/Lijinzh/gpt-image-2-cli"
+Documentation = "https://lijinzh.github.io/gpt-image-2-cli/"
 
 [dependency-groups]
 dev = [

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050713">
+  <meta name="description" content="GPT-Image 2 CLI：一个支持 CC-Switch 与 OpenAI 兼容中转站的稳健文生图命令行工具。">
+  <meta property="og:title" content="GPT-Image 2 CLI · Turn prompts into pixels">
+  <meta property="og:description" content="安装、配置、预演、生成。把 GPT-Image 工作流安全地带进终端。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://lijinzh.github.io/gpt-image-2-cli/">
+  <meta property="og:image" content="https://lijinzh.github.io/gpt-image-2-cli/assets/examples/star-wars-pixel-art.png">
+  <title>GPT-Image 2 CLI · Turn prompts into pixels</title>
+  <link rel="canonical" href="https://lijinzh.github.io/gpt-image-2-cli/">
+  <link rel="icon" href="assets/icons/pixel-terminal.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <div class="signal-strip" aria-hidden="true">
+    <span>GPT-IMAGE 2 CLI // PROMPT → PIXELS // SAFE CONFIG // OPEN SOURCE //</span>
+    <span>GPT-IMAGE 2 CLI // PROMPT → PIXELS // SAFE CONFIG // OPEN SOURCE //</span>
+  </div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="GPT-Image 2 CLI 首页">
+      <span class="brand__mark" aria-hidden="true">GI</span>
+      <span class="brand__copy">
+        <strong>GPT-IMAGE 2 CLI</strong>
+        <small>PROMPT → PIXELS / OPEN SOURCE</small>
+      </span>
+    </a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav" data-menu-button>MENU</button>
+    <nav class="site-nav" id="site-nav" aria-label="主要导航" data-site-nav>
+      <a href="#quick-start">快速开始</a>
+      <a href="#examples">示例</a>
+      <a href="#reliability">可靠性</a>
+      <a href="#safety">安全</a>
+    </nav>
+    <a class="header-github" href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">
+      <span>LIJINZH / GITHUB</span>
+      <strong>查看开源仓库</strong>
+    </a>
+  </header>
+
+  <main id="main-content">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero__stars" aria-hidden="true"></div>
+      <div class="hero__copy" data-reveal>
+        <h1 id="hero-title">TURN PROMPTS<br><em>INTO PIXELS.</em></h1>
+        <p>一个稳定、可审查、不会擅自重复计费的 GPT-Image 命令行工具。支持 CC-Switch，也支持任意 OpenAI 兼容中转站。</p>
+        <div class="hero__actions">
+          <button class="pixel-button pixel-button--lime" type="button" data-copy-target="codex-command">复制给 Codex 配置</button>
+          <a class="pixel-button pixel-button--cyan" href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">查看 GitHub</a>
+        </div>
+        <div class="terminal-window" aria-label="命令行生成演示">
+          <div class="terminal-window__bar"><span>GENERATOR.EXE</span><i></i><i></i><i></i></div>
+          <pre><code><span class="terminal-green">&gt; gpt-image generate</span>
+"霓虹雨夜的 8-bit 城市"
+<span class="terminal-cyan">--size landscape --quality high</span>
+<span class="terminal-pink">✓ IMAGE VALIDATED / SAVED</span></code></pre>
+        </div>
+      </div>
+
+      <div class="hero__scene" aria-hidden="true" data-reveal>
+        <div class="pixel-moon"><span></span></div>
+        <div class="city city--back">
+          <i style="--x:2%;--w:12%;--h:38%"></i><i style="--x:17%;--w:10%;--h:28%"></i>
+          <i style="--x:30%;--w:14%;--h:48%"></i><i style="--x:48%;--w:11%;--h:34%"></i>
+          <i style="--x:62%;--w:15%;--h:58%"></i><i style="--x:81%;--w:16%;--h:30%"></i>
+        </div>
+        <div class="city-grid"></div>
+        <div class="scene-status"><span>RELAY</span><strong>ONLINE</strong><span>MODEL</span><strong>GPT-IMAGE-2</strong></div>
+      </div>
+    </section>
+
+    <section class="codex-setup" aria-labelledby="codex-title">
+      <div class="section-heading" data-reveal>
+        <p><span>01</span> ONE-LINE SETUP</p>
+        <h2 id="codex-title">复制一句话，交给 Codex。</h2>
+      </div>
+      <div class="copy-deck" data-reveal>
+        <code id="codex-command">请从 https://github.com/Lijinzh/gpt-image-2-cli 安装并配置 gpt-image-2-cli，优先读取我本机当前的 CC-Switch Codex 供应商；先运行 gpt-image doctor 和一次不计费的 --dry-run，禁止打印、复制或保存 API Key；如果没有 CC-Switch，就指导我在本机设置 GPT_IMAGE_API_BASE 和 GPT_IMAGE_API_KEY，不要让我在聊天中粘贴 Key；验证成功后告诉我安装位置和一条可直接生成图片的命令。</code>
+        <button class="pixel-button pixel-button--lime" type="button" data-copy-target="codex-command">COPY COMMAND</button>
+      </div>
+      <p class="privacy-note" data-reveal><img src="assets/icons/pixel-shield.svg" alt="" width="30" height="30">提示词只会写入剪贴板；真实 API Key 始终留在使用者自己的电脑上。</p>
+    </section>
+
+    <section class="quick-start" id="quick-start" aria-labelledby="quick-start-title">
+      <div class="section-heading" data-reveal>
+        <p><span>02</span> QUICK START</p>
+        <h2 id="quick-start-title">四步进入生成循环</h2>
+      </div>
+      <ol class="step-rail">
+        <li class="step step--cyan" data-reveal>
+          <span>01</span><strong>INSTALL</strong><p>用 uv 从 GitHub 安装 CLI。</p>
+          <code id="install-command">uv tool install "git+https://github.com/Lijinzh/gpt-image-2-cli.git"</code>
+          <button type="button" data-copy-target="install-command">复制安装命令</button>
+        </li>
+        <li class="step step--pink" data-reveal>
+          <span>02</span><strong>DOCTOR</strong><p>只读检查当前供应商、模型与网络配置。</p>
+          <code>gpt-image doctor</code>
+        </li>
+        <li class="step step--orange" data-reveal>
+          <span>03</span><strong>DRY RUN</strong><p>先预览请求，不生成图片，也不产生模型费用。</p>
+          <code>gpt-image generate "..." --dry-run</code>
+        </li>
+        <li class="step step--lime" data-reveal>
+          <span>04</span><strong>GENERATE</strong><p>确认参数后生成，并校验格式与真实像素尺寸。</p>
+          <code>gpt-image generate "..." -o result.png</code>
+        </li>
+      </ol>
+    </section>
+
+    <section class="command-lab" aria-labelledby="command-lab-title">
+      <div class="command-lab__copy" data-reveal>
+        <div class="section-heading">
+          <p><span>PLAY</span> COMMAND LAB</p>
+          <h2 id="command-lab-title">先把命令拼好，再复制。</h2>
+        </div>
+        <p>选择提示词、画幅和质量，页面会实时生成一条可执行命令。这里不会连接 API，也不会读取任何密钥。</p>
+      </div>
+      <form class="command-builder" data-command-builder data-reveal>
+        <label for="prompt-input">提示词</label>
+        <textarea id="prompt-input" rows="4" data-prompt>雨夜霓虹街道上的像素风机甲快递员，16-bit RPG 场景，蓝紫配色，无文字</textarea>
+        <div class="command-builder__options">
+          <label>画幅
+            <select data-size>
+              <option value="landscape">横图 landscape</option>
+              <option value="square">方图 square</option>
+              <option value="portrait">竖图 portrait</option>
+            </select>
+          </label>
+          <label>质量
+            <select data-quality>
+              <option value="high">high</option>
+              <option value="medium">medium</option>
+              <option value="low">low</option>
+            </select>
+          </label>
+        </div>
+        <div class="generated-command"><code id="generated-command" data-command-output></code></div>
+        <button class="pixel-button pixel-button--cyan" type="button" data-copy-target="generated-command">复制生成命令</button>
+      </form>
+    </section>
+
+    <section class="examples" id="examples" aria-labelledby="examples-title">
+      <div class="section-heading" data-reveal>
+        <p><span>03</span> IMAGE GALLERY</p>
+        <h2 id="examples-title">提示词先看得见，再拿去生成。</h2>
+        <p class="section-heading__lead">实际输出与示意图分开标注。点击任意提示词，可直接送进上面的命令实验台。</p>
+      </div>
+      <div class="gallery">
+        <article class="gallery-item gallery-item--wide" data-reveal>
+          <figure>
+            <img src="assets/examples/snow-observatory-generated.png" alt="雪山湖泊旁的未来观测站实际生成图片" width="1536" height="1024" loading="lazy">
+            <figcaption>ACTUAL CLI OUTPUT / 1536 × 1024</figcaption>
+          </figure>
+          <div class="gallery-item__copy">
+            <span>实际生成输出</span>
+            <h3>雪山湖畔的未来观测站</h3>
+            <p>来自本项目 CLI 烟雾测试的实际落盘图片，用来展示横向大图、长等待与图片校验流程。</p>
+          </div>
+        </article>
+        <article class="gallery-item" data-reveal>
+          <figure><img src="assets/examples/star-wars-pixel-art.png" alt="双日落沙漠与太空歌剧角色的像素风示意图" width="1280" height="768" loading="lazy"><figcaption>REPRODUCIBLE PIXEL PREVIEW</figcaption></figure>
+          <div class="gallery-item__copy">
+            <span>可复现示意图</span><h3>双日落 · 像素太空歌剧</h3>
+            <p>非官方致敬风格，不含官方 Logo；由仓库脚本确定性绘制。</p>
+            <button type="button" data-use-prompt="双日落下的沙漠山脊，年轻的太空冒险者与蓝白机器人眺望远方战机，16-bit 像素艺术，复古游戏配色，无文字、无 Logo">使用这个提示词</button>
+          </div>
+        </article>
+        <article class="gallery-item" data-reveal>
+          <figure><img src="assets/examples/cyberpunk-courier-pixel-art.png" alt="雨夜霓虹城市中的机甲快递员像素示意图" width="1280" height="768" loading="lazy"><figcaption>REPRODUCIBLE PIXEL PREVIEW</figcaption></figure>
+          <div class="gallery-item__copy">
+            <span>可复现示意图</span><h3>霓虹雨城 · 机甲快递员</h3>
+            <p>蓝紫霓虹、密集高楼与反光街面，适合测试像素风场景。</p>
+            <button type="button" data-use-prompt="雨夜霓虹街道上的像素风机甲快递员，16-bit RPG 场景，蓝紫配色，无文字">使用这个提示词</button>
+          </div>
+        </article>
+        <article class="gallery-item" data-reveal>
+          <figure><img src="assets/examples/great-wall-starfleet-pixel-art.png" alt="长城日出云海与星舰编队的像素示意图" width="1280" height="768" loading="lazy"><figcaption>REPRODUCIBLE PIXEL PREVIEW</figcaption></figure>
+          <div class="gallery-item__copy">
+            <span>可复现示意图</span><h3>长城云海 · 星舰编队</h3>
+            <p>中国科幻与复古街机色彩的组合，适合测试宽幅叙事构图。</p>
+            <button type="button" data-use-prompt="长城上空的像素风星舰编队，日出云海，复古街机美术，宽幅构图，无文字">使用这个提示词</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="reliability" id="reliability" aria-labelledby="reliability-title">
+      <div class="section-heading" data-reveal>
+        <p><span>04</span> BUILT FOR THE LONG RUN</p>
+        <h2 id="reliability-title">大图慢一点，也要把结果安全带回来。</h2>
+      </div>
+      <div class="reliability__grid">
+        <dl class="metrics" data-reveal>
+          <div><dt>30 MIN</dt><dd>大图请求的默认等待窗口，并持续输出心跳。</dd></div>
+          <div><dt>NO RETRY</dt><dd>读超时或断线后不自动重投，降低重复计费风险。</dd></div>
+          <div><dt>ATOMIC SAVE</dt><dd>先校验图片，再原子写入目标文件。</dd></div>
+        </dl>
+        <div class="response-check" data-reveal>
+          <h3>RESPONSE CHECK</h3>
+          <ul><li>Base64 JSON</li><li>Base64 data URI</li><li>HTTP(S) image URL</li><li>Direct image response</li><li>Simple SSE response</li><li>Actual pixel-size validation</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="safety" id="safety" aria-labelledby="safety-title">
+      <div class="safety__art" aria-hidden="true"><img src="assets/icons/pixel-shield.svg" alt="" width="168" height="168"><span>KEY</span><strong>LOCAL</strong></div>
+      <div class="safety__copy" data-reveal>
+        <div class="section-heading">
+          <p><span>05</span> API KEY SAFETY</p>
+          <h2 id="safety-title">仓库公开，密钥仍然留在本机。</h2>
+        </div>
+        <p>CLI 只读访问当前用户的 CC-Switch 配置，或者从环境变量获取凭据。它没有 <code>--api-key</code> 参数，不会把 Key 写入图片、请求元数据或公开日志。</p>
+        <ul>
+          <li><strong>不打印</strong> Bearer Token 与真实 API Key</li>
+          <li><strong>不提交</strong> <code>.env</code>、生成结果与请求元数据</li>
+          <li><strong>不共享</strong> 每位合作伙伴使用自己的供应商与密钥</li>
+        </ul>
+        <a href="https://github.com/Lijinzh/gpt-image-2-cli/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer">阅读安全说明 →</a>
+      </div>
+    </section>
+
+    <section class="final-cta" aria-labelledby="final-title">
+      <p>READY PLAYER?</p>
+      <h2 id="final-title">把你的下一张图，交给终端。</h2>
+      <div>
+        <button class="pixel-button pixel-button--lime" type="button" data-copy-target="codex-command">INSTALL WITH CODEX</button>
+        <a class="pixel-button pixel-button--cyan" href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">OPEN GITHUB</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div><strong>GPT-IMAGE 2 CLI</strong><span>MIT LICENSE · MADE BY LIJINZH</span></div>
+    <nav aria-label="页脚导航"><a href="#quick-start">快速开始</a><a href="#examples">示例</a><a href="#safety">安全</a><a href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">GitHub</a></nav>
+  </footer>
+
+  <div class="copy-toast" role="status" aria-live="polite" data-copy-toast>已复制到剪贴板</div>
+</body>
+</html>

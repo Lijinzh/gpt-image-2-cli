@@ -5,8 +5,8 @@ from pathlib import Path
 
 from PIL import Image
 
-from gpt_image_cli.client import ImagePayload
 from gpt_image_cli.image_io import save_images
+from gpt_image_cli.models import ImagePayload
 
 
 def make_png(width: int, height: int) -> bytes:

@@ -40,6 +40,8 @@ def test_site_has_required_public_content() -> None:
     assert "四步进入生成循环" in content
     assert "实际生成输出" in content
     assert "API KEY SAFETY" in content
+    assert "打开意见反馈窗口" in content
+    assert "前往 GitHub 提交 Issue" in content
     assert "https://github.com/Lijinzh/gpt-image-2-cli" in (DOCS / "index.html").read_text(
         encoding="utf-8"
     )
@@ -66,5 +68,18 @@ def test_site_javascript_and_css_are_wired() -> None:
     assert 'src="script.js"' in html
     assert 'href="styles.css"' in html
     assert "data-copy-target" in javascript
+    assert "website-feedback" in javascript
+    assert "issues/new" in javascript
+    assert "showModal" in javascript
     assert "prefers-reduced-motion" in stylesheet
     assert (DOCS / ".nojekyll").is_file()
+
+
+def test_github_feedback_issue_form_exists() -> None:
+    issue_form = ROOT / ".github" / "ISSUE_TEMPLATE" / "feedback.yml"
+    content = issue_form.read_text(encoding="utf-8")
+    assert issue_form.is_file()
+    assert "name: 用户反馈 / User feedback" in content
+    assert "  - feedback" in content
+    assert "API Key" in content
+    assert "required: true" in content

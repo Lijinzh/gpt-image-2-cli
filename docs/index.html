@@ -38,6 +38,7 @@
       <a href="#examples">示例</a>
       <a href="#reliability">可靠性</a>
       <a href="#safety">安全</a>
+      <a href="#feedback">反馈</a>
     </nav>
     <a class="header-github" href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">
       <span>LIJINZH / GITHUB</span>
@@ -226,6 +227,26 @@
       </div>
     </section>
 
+    <section class="feedback" id="feedback" aria-labelledby="feedback-title">
+      <div class="feedback__signal" aria-hidden="true">
+        <span>?</span>
+        <i></i><i></i><i></i>
+        <strong>USER<br>VOICE</strong>
+      </div>
+      <div class="feedback__copy" data-reveal>
+        <div class="section-heading">
+          <p><span>06</span> USER FEEDBACK</p>
+          <h2 id="feedback-title">遇到问题，直接在这里告诉我。</h2>
+        </div>
+        <p>不熟悉 GitHub 也没关系：在网页里写好问题，系统会自动整理成 Issue 标题和正文，再带你到 GitHub 做最后确认。</p>
+        <div class="feedback__actions">
+          <button class="pixel-button pixel-button--lime" type="button" data-feedback-open>打开意见反馈窗口</button>
+          <a href="https://github.com/Lijinzh/gpt-image-2-cli/issues" target="_blank" rel="noopener noreferrer">查看已有反馈 →</a>
+        </div>
+        <p class="feedback__boundary"><strong>为什么还要确认一次？</strong> 网站不会保存 GitHub Token，也不会代替用户公开发布内容。这样可以避免仓库权限泄露和匿名垃圾 Issue。</p>
+      </div>
+    </section>
+
     <section class="final-cta" aria-labelledby="final-title">
       <p>READY PLAYER?</p>
       <h2 id="final-title">把你的下一张图，交给终端。</h2>
@@ -238,8 +259,55 @@
 
   <footer class="site-footer">
     <div><strong>GPT-IMAGE 2 CLI</strong><span>MIT LICENSE · MADE BY LIJINZH</span></div>
-    <nav aria-label="页脚导航"><a href="#quick-start">快速开始</a><a href="#examples">示例</a><a href="#safety">安全</a><a href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">GitHub</a></nav>
+    <nav aria-label="页脚导航"><a href="#quick-start">快速开始</a><a href="#examples">示例</a><a href="#safety">安全</a><button type="button" data-feedback-open>意见反馈</button><a href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">GitHub</a></nav>
   </footer>
+
+  <button class="feedback-fab" type="button" data-feedback-open><span aria-hidden="true">?</span>意见反馈</button>
+
+  <dialog class="feedback-dialog" data-feedback-dialog aria-labelledby="feedback-dialog-title">
+    <form class="feedback-form" data-feedback-form>
+      <header>
+        <div><span>FEEDBACK.EXE</span><strong id="feedback-dialog-title">创建用户反馈</strong></div>
+        <button type="button" aria-label="关闭意见反馈窗口" data-feedback-close>×</button>
+      </header>
+      <div class="feedback-form__body">
+        <p class="feedback-form__intro">填写完成后会打开 GitHub 的新 Issue 页面。未登录时会先进入登录或注册，完成后返回已经填好的 Issue；本页面不会保存你的反馈。</p>
+        <label>反馈类型
+          <select name="category" required data-feedback-category>
+            <option value="bug">使用问题 / Bug</option>
+            <option value="feature">功能建议</option>
+            <option value="question">不会使用 / 求助</option>
+            <option value="other">其他意见</option>
+          </select>
+        </label>
+        <label>一句话标题
+          <input name="subject" type="text" maxlength="90" placeholder="例如：Windows 安装后找不到 gpt-image 命令" required data-feedback-subject>
+        </label>
+        <label>详细说明
+          <textarea name="details" rows="5" maxlength="2000" placeholder="你想做什么？实际发生了什么？希望得到什么结果？" required data-feedback-details></textarea>
+        </label>
+        <label>操作步骤或上下文 <small>可选</small>
+          <textarea name="steps" rows="3" maxlength="1200" placeholder="例如：安装命令 → doctor → generate ..." data-feedback-steps></textarea>
+        </label>
+        <label>使用环境 <small>可选</small>
+          <input name="environment" type="text" maxlength="300" placeholder="例如：Windows 11、Python 3.13、CC-Switch" data-feedback-environment>
+        </label>
+        <div class="feedback-preview">
+          <span>PUBLIC ISSUE PREVIEW</span>
+          <pre data-feedback-preview></pre>
+        </div>
+        <label class="feedback-consent">
+          <input name="consent" type="checkbox" required>
+          <span>我知道 Issue 会公开显示，并确认内容中没有 API Key、Token、私人联系方式或其他敏感信息。</span>
+        </label>
+        <div class="feedback-form__actions">
+          <button class="pixel-button pixel-button--lime" type="submit">前往 GitHub 提交 Issue</button>
+          <button class="pixel-button pixel-button--cyan" type="button" data-feedback-copy>复制反馈内容</button>
+        </div>
+        <a class="feedback-native-link" href="https://github.com/Lijinzh/gpt-image-2-cli/issues/new?template=feedback.yml" target="_blank" rel="noopener noreferrer">也可以改用 GitHub 原生反馈表 →</a>
+      </div>
+    </form>
+  </dialog>
 
   <div class="copy-toast" role="status" aria-live="polite" data-copy-toast>已复制到剪贴板</div>
 </body>

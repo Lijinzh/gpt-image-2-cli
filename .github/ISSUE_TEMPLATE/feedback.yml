@@ -1,0 +1,56 @@
+name: 用户反馈 / User feedback
+description: 报告使用问题、提出功能建议，或询问如何使用 GPT-Image 2 CLI
+title: "[Feedback]: "
+labels:
+  - feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请勿在 Issue 中粘贴 API Key、Bearer Token、带鉴权参数的地址或私人联系方式。
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 反馈类型
+      options:
+        - 使用问题 / Bug
+        - 功能建议
+        - 不会使用 / 求助
+        - 其他意见
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: 详细说明
+      description: 请描述你想做什么、实际发生了什么，以及希望得到的结果。
+      placeholder: 我运行了……，然后看到……，我原本希望……
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 操作步骤或上下文
+      description: 如果可以，请提供能够复现问题的命令或步骤。请先移除任何密钥和敏感地址。
+      placeholder: |
+        1. 安装……
+        2. 运行 gpt-image doctor
+        3. 运行……
+
+  - type: input
+    id: environment
+    attributes:
+      label: 使用环境
+      description: 操作系统、Python 版本、安装方式以及是否使用 CC-Switch。
+      placeholder: Windows 11 / Python 3.13 / uv tool / CC-Switch
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: 安全确认
+      options:
+        - label: 我确认以上内容没有 API Key、Token、私人联系方式或其他敏感信息。
+          required: true

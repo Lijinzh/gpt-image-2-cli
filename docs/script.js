@@ -46,6 +46,89 @@ siteNav?.querySelectorAll('a').forEach((link) => {
   });
 });
 
+const feedbackDialog = document.querySelector('[data-feedback-dialog]');
+const feedbackForm = document.querySelector('[data-feedback-form]');
+const feedbackPreview = document.querySelector('[data-feedback-preview]');
+const feedbackCategory = document.querySelector('[data-feedback-category]');
+const feedbackSubject = document.querySelector('[data-feedback-subject]');
+const feedbackDetails = document.querySelector('[data-feedback-details]');
+const feedbackSteps = document.querySelector('[data-feedback-steps]');
+const feedbackEnvironment = document.querySelector('[data-feedback-environment]');
+const feedbackIssueBase = 'https://github.com/Lijinzh/gpt-image-2-cli/issues/new';
+
+function feedbackDraft() {
+  const category = feedbackCategory?.selectedOptions[0]?.textContent.trim() || '其他意见';
+  const subject = feedbackSubject?.value.trim() || '请填写一句话标题';
+  const details = feedbackDetails?.value.trim() || '请填写详细说明';
+  const steps = feedbackSteps?.value.trim() || '未提供';
+  const environment = feedbackEnvironment?.value.trim() || '未提供';
+  const body = [
+    '<!-- website-feedback -->',
+    '## 反馈类型',
+    category,
+    '',
+    '## 详细说明',
+    details,
+    '',
+    '## 操作步骤或上下文',
+    steps,
+    '',
+    '## 使用环境',
+    environment,
+    '',
+    '---',
+    '通过 GPT-Image 2 CLI 项目网页整理。请勿在公开 Issue 中粘贴 API Key 或其他敏感信息。',
+  ].join('\n');
+  return { title: `[Website Feedback] ${subject}`, body };
+}
+
+function updateFeedbackPreview() {
+  if (!feedbackPreview) return;
+  const draft = feedbackDraft();
+  feedbackPreview.textContent = `${draft.title}\n\n${draft.body}`;
+}
+
+document.querySelectorAll('[data-feedback-open]').forEach((button) => {
+  button.addEventListener('click', () => {
+    if (typeof feedbackDialog?.showModal === 'function') feedbackDialog.showModal();
+    else feedbackDialog?.setAttribute('open', '');
+    updateFeedbackPreview();
+    window.setTimeout(() => feedbackSubject?.focus(), 80);
+  });
+});
+
+document.querySelector('[data-feedback-close]')?.addEventListener('click', () => feedbackDialog?.close());
+feedbackDialog?.addEventListener('click', (event) => {
+  if (event.target === feedbackDialog) feedbackDialog.close();
+});
+
+[feedbackCategory, feedbackSubject, feedbackDetails, feedbackSteps, feedbackEnvironment].forEach(
+  (control) => control?.addEventListener('input', updateFeedbackPreview),
+);
+
+document.querySelector('[data-feedback-copy]')?.addEventListener('click', () => {
+  const draft = feedbackDraft();
+  copyText(`${draft.title}\n\n${draft.body}`);
+});
+
+feedbackForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const draft = feedbackDraft();
+  const issueUrl = new URL(feedbackIssueBase);
+  issueUrl.searchParams.set('title', draft.title);
+  issueUrl.searchParams.set('body', draft.body);
+  if (issueUrl.toString().length > 7000) {
+    await copyText(`${draft.title}\n\n${draft.body}`);
+    issueUrl.searchParams.set(
+      'body',
+      '反馈内容较长，网页已经把完整内容复制到剪贴板。请在这里按 Ctrl+V（macOS 使用 Command+V）粘贴。',
+    );
+  }
+  window.location.assign(issueUrl.toString());
+});
+
+updateFeedbackPreview();
+
 const promptInput = document.querySelector('[data-prompt]');
 const sizeInput = document.querySelector('[data-size]');
 const qualityInput = document.querySelector('[data-quality]');

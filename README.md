@@ -24,7 +24,7 @@
 需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。
 
 ```powershell
-cd C:\Users\admin\Documents\Codex\gpt-image-2-cli
+cd C:\Users\admin\Desktop\SomethingElse\gpt-image-2-cli
 uv tool install .
 gpt-image --version
 ```

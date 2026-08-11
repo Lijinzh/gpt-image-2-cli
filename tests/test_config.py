@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from gpt_image_cli.config import ConfigError, load_cc_switch, normalize_api_base
+from gpt_image_cli.config import ApiConfig, load_cc_switch, normalize_api_base, redact
+from gpt_image_cli.errors import ConfigError
 
 
 def test_normalize_api_base_allows_local_http() -> None:
@@ -16,6 +17,30 @@ def test_normalize_api_base_allows_local_http() -> None:
 def test_normalize_api_base_rejects_remote_http() -> None:
     with pytest.raises(ConfigError, match="non-HTTPS"):
         normalize_api_base("http://example.com/v1")
+
+
+def test_normalize_api_base_rejects_embedded_credentials() -> None:
+    with pytest.raises(ConfigError, match="embedded credentials"):
+        normalize_api_base("https://user:secret@relay.example/v1")
+
+
+def test_api_key_is_not_exposed_by_config_repr() -> None:
+    config = ApiConfig(
+        provider="test",
+        api_base="https://relay.example/v1",
+        api_key="must-not-appear",
+        source="test",
+    )
+    assert "must-not-appear" not in repr(config)
+
+
+def test_redact_removes_current_key_and_bearer_tokens() -> None:
+    key = "test-api-key-value"
+    bearer = "bearer-token-test"
+    text = f"key={key}; Authorization: Bearer {bearer}"
+    safe = redact(text, key)
+    assert key not in safe
+    assert bearer not in safe
 
 
 def test_load_cc_switch_reads_current_codex_provider(tmp_path: Path) -> None:

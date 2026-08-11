@@ -8,7 +8,8 @@ from pathlib import Path
 
 from PIL import Image, UnidentifiedImageError
 
-from .client import GenerationError, ImagePayload
+from .errors import GenerationError
+from .models import ImagePayload
 
 FORMAT_SUFFIXES = {
     "PNG": ".png",

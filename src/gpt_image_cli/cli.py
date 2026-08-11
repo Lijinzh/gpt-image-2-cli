@@ -8,17 +8,17 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
-from .client import (
+from .client import ImageClient
+from .config import ApiConfig, resolve_api_config
+from .errors import CliError, GenerationError
+from .image_io import save_images
+from .models import (
     SIZE_ALIASES,
     SUPPORTED_BACKGROUNDS,
     SUPPORTED_QUALITIES,
     SUPPORTED_SIZES,
-    GenerationError,
     GenerationOptions,
-    ImageClient,
 )
-from .config import ConfigError, resolve_api_config
-from .image_io import save_images
 
 DEFAULT_CC_SWITCH_DB = Path.home() / ".cc-switch" / "cc-switch.db"
 DEFAULT_MODEL = os.getenv("GPT_IMAGE_MODEL", "gpt-image-2")
@@ -124,7 +124,7 @@ def _read_prompt(args: argparse.Namespace) -> str:
     return prompt
 
 
-def _client(args: argparse.Namespace) -> tuple[Any, ImageClient]:
+def _client(args: argparse.Namespace) -> tuple[ApiConfig, ImageClient]:
     config = resolve_api_config(
         api_base=args.api_base,
         cc_switch_db=args.cc_switch_db,
@@ -229,17 +229,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "generate":
             return _generate(args)
         parser.error("Unknown command.")
-    except ConfigError as exc:
-        print(f"CONFIG ERROR: {exc}", file=sys.stderr)
-        return 2
-    except GenerationError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+    except CliError as exc:
+        print(f"{exc.label}: {exc}", file=sys.stderr)
         if exc.possibly_billed:
             print(
                 "The request may already have been billed. It was not retried automatically.",
                 file=sys.stderr,
             )
-        return 3
+        return exc.exit_code
     return 2
 
 

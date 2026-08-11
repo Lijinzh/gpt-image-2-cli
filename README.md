@@ -1,5 +1,7 @@
 # GPT-Image 2 CLI
 
+[![CI](https://github.com/Lijinzh/gpt-image-2-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Lijinzh/gpt-image-2-cli/actions/workflows/ci.yml)
+
 一个面向 OpenAI 兼容中转站的稳健文生图 CLI。它可以自动读取当前 CC-Switch Codex
 供应商，也可以通过环境变量连接任意兼容 API。
 
@@ -23,15 +25,18 @@
 
 需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。
 
+直接从 GitHub 安装：
+
 ```powershell
-cd C:\Users\admin\Desktop\SomethingElse\gpt-image-2-cli
-uv tool install .
+uv tool install "git+https://github.com/Lijinzh/gpt-image-2-cli.git"
 gpt-image --version
 ```
 
-开发模式：
+从源码安装或参与开发：
 
 ```powershell
+git clone https://github.com/Lijinzh/gpt-image-2-cli.git
+cd gpt-image-2-cli
 uv sync
 uv run gpt-image --version
 ```
@@ -92,6 +97,16 @@ gpt-image doctor
 
 为了避免密钥进入 shell 历史，CLI 不提供 `--api-key` 参数。
 
+## API Key 安全
+
+- 仓库不包含任何真实 API Key，也不会把 Key 写入生成图片或请求元数据。
+- 使用 CC-Switch 时，CLI 仅以只读方式从当前用户本机数据库读取当前 Codex 供应商；
+  数据库和 Key 不会被复制到项目目录。
+- 使用环境变量时，`.env` 和 `.env.*` 默认被 Git 忽略，仓库只保留占位用的
+  `.env.example`。
+- 错误信息会清理 Bearer Token 和当前 API Key；配置对象的调试表示也不会显示 Key。
+- 每位使用者应配置自己的供应商和 Key，不要通过聊天、Issue 或提交记录共享真实 Key。
+
 ## 可靠性说明
 
 “请求稳定”和“服务端永不失败”不是一回事。CLI 会尽量兼容常见响应、延长大图等待时间、
@@ -112,6 +127,22 @@ gpt-image doctor
 
 本项目是独立的 Python 实现，没有复制 Cherry Studio 的大段源码。
 
+## 项目结构
+
+```text
+src/gpt_image_cli/
+├── cli.py          # 参数解析和命令编排
+├── config.py       # 环境变量与 CC-Switch 只读配置
+├── models.py       # 请求参数和结果数据模型
+├── responses.py    # JSON、SSE、Base64 和 URL 响应解析
+├── client.py       # HTTP 请求、超时和计费风险处理
+├── image_io.py     # 图片验证与原子写入
+└── errors.py       # 可安全展示的错误与退出码
+```
+
+模块按职责分开，但保持单进程、同步调用和少量依赖，便于审查 API Key 流向，也避免为小型
+CLI 引入不必要的框架。
+
 ## 测试与构建
 
 ```powershell
@@ -120,7 +151,8 @@ uv run ruff check .
 uv build
 ```
 
-## 发布建议
+## 开源与贡献
 
-仓库不包含任何中转站密钥，可以直接放入 GitHub 私有仓库。确认名称与许可证后，也可以
-发布 GitHub Release、源码包和 wheel；如要发布到 PyPI，建议先确认包名是否可用。
+项目使用 MIT License。欢迎提交 Issue 和 Pull Request；请勿在公开内容中粘贴真实 API
+Key、供应商凭据或带鉴权参数的请求地址。开发方式见 [CONTRIBUTING.md](CONTRIBUTING.md)，
+安全问题见 [SECURITY.md](SECURITY.md)。

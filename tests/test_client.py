@@ -7,15 +7,13 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
+import pytest
 from PIL import Image
 
-from gpt_image_cli.client import (
-    GenerationOptions,
-    ImageClient,
-    _decode_json_or_sse,
-    _extract_candidates,
-)
+from gpt_image_cli.client import ImageClient
 from gpt_image_cli.config import ApiConfig
+from gpt_image_cli.errors import GenerationError
+from gpt_image_cli.models import GenerationOptions
 
 
 def make_png(width: int = 16, height: int = 8) -> bytes:
@@ -24,42 +22,15 @@ def make_png(width: int = 16, height: int = 8) -> bytes:
     return output.getvalue()
 
 
-def test_large_payload_uses_supported_size_without_response_format() -> None:
-    payload = GenerationOptions(
-        model="gpt-image-2",
-        prompt="a landscape",
-        size="landscape",
-        quality="high",
-    ).payload()
-    assert payload == {
-        "model": "gpt-image-2",
-        "prompt": "a landscape",
-        "n": 1,
-        "size": "1536x1024",
-        "quality": "high",
-    }
-    assert "response_format" not in payload
-
-
-def test_extracts_base64_url_and_nested_data_uri() -> None:
-    payload: dict[str, Any] = {
-        "data": [
-            {"b64_json": "YWJj"},
-            {"url": "https://example.com/a.png"},
-            {"result": {"image_base64": "data:image/png;base64,YWJj"}},
-        ]
-    }
-    assert _extract_candidates(payload) == [
-        ("base64", "YWJj"),
-        ("url", "https://example.com/a.png"),
-        ("base64", "data:image/png;base64,YWJj"),
-    ]
-
-
-def test_decodes_sse_response() -> None:
-    body = b'data: {"status":"working"}\n\ndata: {"data":[{"b64_json":"YWJj"}]}\n\ndata: [DONE]\n'
-    decoded = _decode_json_or_sse(body, "text/event-stream")
-    assert _extract_candidates(decoded) == [("base64", "YWJj")]
+def test_client_rejects_non_positive_limits() -> None:
+    config = ApiConfig(
+        provider="test",
+        api_base="https://relay.example/v1",
+        api_key="test-key",
+        source="test",
+    )
+    with pytest.raises(GenerationError, match="greater than zero"):
+        ImageClient(config, max_response_mb=0)
 
 
 def test_client_handles_openai_compatible_base64_response() -> None:

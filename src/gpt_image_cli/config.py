@@ -6,21 +6,19 @@ import re
 import sqlite3
 import tomllib
 from contextlib import closing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-
-class ConfigError(RuntimeError):
-    """A configuration problem that can be shown directly to the user."""
+from .errors import ConfigError
 
 
 @dataclass(frozen=True, slots=True)
 class ApiConfig:
     provider: str
     api_base: str
-    api_key: str
+    api_key: str = field(repr=False)
     source: str
 
     @property
@@ -37,6 +35,10 @@ def normalize_api_base(value: str, *, allow_http: bool = False) -> str:
     parsed = urlparse(api_base)
     if not parsed.scheme or not parsed.netloc:
         raise ConfigError("API base URL is not a valid absolute URL.")
+    if parsed.username or parsed.password:
+        raise ConfigError("API base URL must not contain embedded credentials.")
+    if parsed.query or parsed.fragment:
+        raise ConfigError("API base URL must not contain a query string or fragment.")
     if parsed.scheme != "https":
         is_local = parsed.scheme == "http" and parsed.hostname in {"127.0.0.1", "localhost", "::1"}
         if not (allow_http or is_local):
@@ -100,10 +102,10 @@ def load_cc_switch(db_path: Path, *, allow_http: bool = False) -> ApiConfig:
         raise ConfigError("Current CC-Switch Codex provider has no config text.")
 
     return ApiConfig(
-        provider=str(provider_name),
+        provider=str(provider_name or "CC-Switch"),
         api_base=normalize_api_base(_parse_base_url(config_text), allow_http=allow_http),
         api_key=api_key,
-        source=f"cc-switch:{db_path.resolve()}",
+        source="cc-switch",
     )
 
 

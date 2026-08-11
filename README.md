@@ -1,5 +1,20 @@
 # GPT-Image 2 CLI
 
+> [!TIP]
+> **复制下面这一句话给 Codex，即可自动安装和安全配置：**
+
+```text
+请从 https://github.com/Lijinzh/gpt-image-2-cli 安装并配置 gpt-image-2-cli，优先读取我本机当前的 CC-Switch Codex 供应商；先运行 gpt-image doctor 和一次不计费的 --dry-run，禁止打印、复制或保存 API Key；如果没有 CC-Switch，就指导我在本机设置 GPT_IMAGE_API_BASE 和 GPT_IMAGE_API_KEY，不要让我在聊天中粘贴 Key；验证成功后告诉我安装位置和一条可直接生成图片的命令。
+```
+
+<p align="center">
+  <img src="docs/assets/icons/pixel-terminal.svg" width="58" alt="像素终端图标">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/assets/icons/pixel-image.svg" width="58" alt="像素图片图标">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/assets/icons/pixel-shield.svg" width="58" alt="像素安全盾牌图标">
+</p>
+
 [![CI](https://github.com/Lijinzh/gpt-image-2-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Lijinzh/gpt-image-2-cli/actions/workflows/ci.yml)
 
 一个面向 OpenAI 兼容中转站的稳健文生图 CLI。它可以自动读取当前 CC-Switch Codex
@@ -7,6 +22,30 @@
 
 项目重点解决旧脚本在大图生成时的几个问题：无法传入横图/竖图尺寸、等待时间太短、
 返回大体积 Base64 时缺少校验、只兼容一种响应结构，以及超时后容易误重试并重复计费。
+
+## 🕹️ 直观示例：Star Wars 像素风
+
+<p align="center">
+  <img src="docs/assets/examples/star-wars-pixel-art.png" width="860" alt="Star Wars 致敬风格的像素艺术示意图">
+</p>
+
+<p align="center"><sub>非官方 Star Wars 致敬像素风示意图，不包含官方 Logo；README 资产可通过 <code>scripts/render_readme_pixel_art.py</code> 复现。</sub></p>
+
+用 CLI 生成属于你自己的 AI 版本：
+
+```powershell
+gpt-image generate "Star Wars 宇宙中的 16-bit 像素艺术场景：Luke Skywalker 手持蓝色光剑，与 R2-D2 站在双日落下的沙漠山脊，远处有 X-wing，复古游戏配色，无文字、无 Logo" `
+  --size landscape --quality high `
+  -o .\artifacts\star-wars-pixel.png
+```
+
+更多可直接尝试的提示词：
+
+| 风格 | 提示词 |
+| --- | --- |
+| 赛博朋克 | `雨夜霓虹街道上的像素风机甲快递员，16-bit RPG 场景，蓝紫配色` |
+| 可爱机器人 | `一只在月球泡咖啡的迷你像素机器人，掌机游戏截图风格` |
+| 中国科幻 | `长城上空的像素风星舰编队，日出云海，复古街机美术` |
 
 ## 特性
 

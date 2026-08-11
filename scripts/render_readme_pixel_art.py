@@ -9,6 +9,8 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "assets" / "examples" / "star-wars-pixel-art.png"
+CYBER_OUTPUT = ROOT / "docs" / "assets" / "examples" / "cyberpunk-courier-pixel-art.png"
+GREAT_WALL_OUTPUT = ROOT / "docs" / "assets" / "examples" / "great-wall-starfleet-pixel-art.png"
 PIXEL_SIZE = (160, 96)
 SCALE = 8
 
@@ -146,5 +148,127 @@ def render() -> Path:
     return OUTPUT
 
 
+def _render_cyberpunk_courier() -> Path:
+    image = Image.new("RGB", PIXEL_SIZE, "#050717")
+    draw = ImageDraw.Draw(image)
+    for y, color in ((0, "#06091f"), (24, "#10103b"), (45, "#241047")):
+        draw.rectangle((0, y, 159, 95), fill=color)
+
+    rng = random.Random(2049)
+    for _ in range(74):
+        x = rng.randrange(0, 160)
+        y = rng.randrange(2, 59)
+        draw.rectangle((x, y, x, y + rng.randrange(1, 4)), fill=rng.choice(("#22d3ee", "#f472b6")))
+
+    buildings = (
+        (2, 33, 29),
+        (34, 22, 56),
+        (61, 37, 80),
+        (85, 17, 112),
+        (118, 29, 143),
+        (147, 12, 159),
+    )
+    for index, (left, top, right) in enumerate(buildings):
+        draw.rectangle((left, top, right, 80), fill="#090f27", outline="#1e3a5f")
+        glow = "#22d3ee" if index % 2 == 0 else "#f472b6"
+        for wy in range(top + 6, 76, 9):
+            for wx in range(left + 4, right - 2, 8):
+                if (wx + wy + index) % 3:
+                    draw.rectangle((wx, wy, wx + 2, wy + 3), fill=glow)
+
+    draw.polygon(((0, 81), (160, 74), (160, 95), (0, 95)), fill="#07101e")
+    draw.line((0, 91, 159, 82), fill="#22d3ee", width=1)
+    draw.line((72, 80, 72, 95), fill="#facc15", width=1)
+    draw.line((104, 78, 117, 95), fill="#facc15", width=1)
+
+    draw.rectangle((69, 54, 78, 69), fill="#111827")
+    draw.rectangle((71, 50, 76, 55), fill="#dbeafe")
+    draw.rectangle((72, 51, 76, 53), fill="#22d3ee")
+    draw.rectangle((65, 58, 69, 70), fill="#ec4899")
+    draw.rectangle((78, 58, 83, 70), fill="#0ea5e9")
+    draw.rectangle((69, 69, 72, 82), fill="#111827")
+    draw.rectangle((76, 69, 79, 82), fill="#111827")
+    draw.rectangle((60, 56, 65, 66), fill="#facc15")
+    draw.rectangle((61, 58, 64, 62), fill="#f97316")
+
+    CYBER_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    image.resize((PIXEL_SIZE[0] * SCALE, PIXEL_SIZE[1] * SCALE), Image.Resampling.NEAREST).save(
+        CYBER_OUTPUT,
+        format="PNG",
+        optimize=True,
+    )
+    return CYBER_OUTPUT
+
+
+def _render_great_wall_starfleet() -> Path:
+    image = Image.new("RGB", PIXEL_SIZE, "#0b1730")
+    draw = ImageDraw.Draw(image)
+    bands = ((0, 18, "#101c3c"), (18, 36, "#17476b"), (36, 52, "#e1644d"), (52, 66, "#f7a454"))
+    for top, bottom, color in bands:
+        draw.rectangle((0, top, 159, bottom), fill=color)
+
+    draw.rectangle((17, 12, 25, 20), fill="#fbbf24")
+    draw.rectangle((15, 14, 27, 18), fill="#fde68a")
+    draw.rectangle((18, 13, 24, 19), fill="#fff7cc")
+
+    rng = random.Random(2210)
+    for _ in range(44):
+        x = rng.randrange(2, 158)
+        y = rng.randrange(2, 38)
+        draw.point((x, y), fill=rng.choice(("#dbeafe", "#fde68a", "#93c5fd")))
+
+    draw.polygon(
+        (
+            (0, 63),
+            (27, 45),
+            (52, 62),
+            (79, 42),
+            (109, 65),
+            (136, 46),
+            (159, 58),
+            (159, 95),
+            (0, 95),
+        ),
+        fill="#1d4d63",
+    )
+    draw.polygon(
+        (
+            (0, 74),
+            (33, 57),
+            (63, 74),
+            (91, 54),
+            (125, 76),
+            (159, 60),
+            (159, 95),
+            (0, 95),
+        ),
+        fill="#183c4f",
+    )
+    draw.rectangle((0, 80, 159, 95), fill="#102c3d")
+
+    wall = ((0, 88), (24, 78), (45, 82), (68, 69), (91, 75), (116, 62), (140, 70), (159, 59))
+    draw.line(wall, fill="#d6b27a", width=4)
+    draw.line(wall, fill="#7c5037", width=1)
+    for x, y in ((22, 78), (66, 68), (115, 61), (143, 67)):
+        draw.rectangle((x - 4, y - 6, x + 4, y + 3), fill="#9a6a45", outline="#f4d19b")
+        draw.rectangle((x - 2, y - 9, x + 2, y - 6), fill="#9a6a45")
+
+    ships = ((92, 24, 1), (119, 17, 0), (138, 30, 2))
+    for x, y, accent in ships:
+        draw.polygon(((x, y), (x + 12, y + 3), (x + 3, y + 6)), fill="#dbeafe")
+        draw.rectangle((x + 3, y + 2, x + 8, y + 3), fill=("#22d3ee", "#f472b6", "#facc15")[accent])
+        draw.line((x - 7, y + 4, x, y + 3), fill="#e0f2fe", width=1)
+
+    GREAT_WALL_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    image.resize((PIXEL_SIZE[0] * SCALE, PIXEL_SIZE[1] * SCALE), Image.Resampling.NEAREST).save(
+        GREAT_WALL_OUTPUT,
+        format="PNG",
+        optimize=True,
+    )
+    return GREAT_WALL_OUTPUT
+
+
 if __name__ == "__main__":
     print(render())
+    print(_render_cyberpunk_courier())
+    print(_render_great_wall_starfleet())

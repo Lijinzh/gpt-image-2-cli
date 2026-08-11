@@ -1,5 +1,7 @@
 # GPT-Image 2 CLI
 
+🌃 **项目网页：** [lijinzh.github.io/gpt-image-2-cli](https://lijinzh.github.io/gpt-image-2-cli/) · 安装步骤、交互式命令生成器与示例画廊
+
 > [!TIP]
 > **复制下面这一句话给 Codex，即可自动安装和安全配置：**
 
@@ -16,6 +18,7 @@
 </p>
 
 [![CI](https://github.com/Lijinzh/gpt-image-2-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Lijinzh/gpt-image-2-cli/actions/workflows/ci.yml)
+[![Website](https://img.shields.io/badge/GitHub%20Pages-8--bit%20neon-13f4ef?style=flat-square)](https://lijinzh.github.io/gpt-image-2-cli/)
 
 一个面向 OpenAI 兼容中转站的稳健文生图 CLI。它可以自动读取当前 CC-Switch Codex
 供应商，也可以通过环境变量连接任意兼容 API。

@@ -309,7 +309,8 @@ def _update(args: argparse.Namespace) -> int:
         candidate = result.candidate
         assert candidate is not None
         print(
-            f"Installing verified {candidate.version} wheel from {candidate.source}...",
+            f"Downloading verified {candidate.version} wheel from {candidate.source}; "
+            "installation will start after this command exits...",
             file=sys.stderr,
             flush=True,
         )

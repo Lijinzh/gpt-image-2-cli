@@ -132,13 +132,39 @@ def test_automatic_notice_is_rate_limited(monkeypatch: object, tmp_path: Path) -
         )
 
     monkeypatch.setattr("gpt_image_cli.updater.check_for_updates", fake_check)
+    monkeypatch.setattr(
+        "gpt_image_cli.updater.install_update",
+        lambda *_args, **_kwargs: {"update_scheduled": True},
+    )
     first = automatic_update_notice(now=1000, interval=100, state_path=state_path)
     second = automatic_update_notice(now=1050, interval=100, state_path=state_path)
     third = automatic_update_notice(now=1101, interval=100, state_path=state_path)
-    assert "0.2.0 -> 0.3.0" in (first or "")
+    assert "install automatically" in (first or "")
     assert second is None
-    assert "gpt-image update" in (third or "")
+    assert "install automatically" in (third or "")
     assert calls == 2
+
+
+def test_automatic_notice_falls_back_to_manual_instruction(
+    monkeypatch: object, tmp_path: Path
+) -> None:
+    from gpt_image_cli.updater import UpdateCheck
+
+    monkeypatch.setattr(
+        "gpt_image_cli.updater.check_for_updates",
+        lambda **_kwargs: UpdateCheck(
+            current_version=Version("0.2.0"),
+            candidate=candidate("github", "0.3.0"),
+            checked_sources=("github",),
+            source_errors={},
+        ),
+    )
+    monkeypatch.setattr(
+        "gpt_image_cli.updater.install_update",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(UpdateError("not uv managed")),
+    )
+    notice = automatic_update_notice(state_path=tmp_path / "state.json")
+    assert "Run `gpt-image update`" in (notice or "")
 
 
 def test_automatic_notice_can_be_disabled(monkeypatch: object, tmp_path: Path) -> None:

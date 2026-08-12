@@ -6,10 +6,10 @@ import hashlib
 import json
 import os
 import platform
+import shlex
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -172,7 +172,7 @@ def automatic_update_notice(
     timeout: float = AUTO_CHECK_TIMEOUT_SECONDS,
     state_path: Path | None = None,
 ) -> str | None:
-    """Return a low-frequency update reminder, without changing the installation."""
+    """Schedule a verified low-frequency update after the current command exits."""
     disabled = os.getenv(UPDATE_CHECK_DISABLED_ENV, "").strip().lower()
     if disabled in {"1", "true", "yes", "on"}:
         return None
@@ -188,9 +188,16 @@ def automatic_update_notice(
     if not result.update_available or result.candidate is None:
         return None
     candidate = result.candidate
+    try:
+        install_update(candidate, timeout=max(30, timeout * 10))
+    except UpdateError:
+        return (
+            f"Update available: gpt-image {result.current_version} -> {candidate.version} "
+            f"({candidate.source}). Run `gpt-image update` to install it."
+        )
     return (
-        f"Update available: gpt-image {result.current_version} -> {candidate.version} "
-        f"({candidate.source}). Run `gpt-image update` to install it."
+        f"Verified gpt-image {candidate.version} from {candidate.source}; "
+        "it will install automatically after this command exits."
     )
 
 
@@ -570,6 +577,109 @@ def _uv_manages_current_environment(uv: str) -> bool:
     return True
 
 
+def _quote_powershell(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def _update_work_dir() -> Path:
+    path = _update_state_path().parent / "updates"
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise UpdateError(f"Could not create the update working directory: {exc}") from exc
+    return path
+
+
+def _write_update_helper(uv: str, wheel: Path, candidate: ReleaseCandidate) -> Path:
+    work_dir = wheel.parent
+    suffix = f"{candidate.version}-{os.getpid()}"
+    result_path = work_dir / f"result-{suffix}.json"
+    log_path = work_dir / f"install-{suffix}.log"
+    uv_text = _quote_powershell(uv)
+    wheel_text = _quote_powershell(str(wheel))
+    log_text = _quote_powershell(str(log_path))
+    result_text = _quote_powershell(str(result_path))
+    version_text = _quote_powershell(str(candidate.version))
+    if sys.platform == "win32":
+        helper = work_dir / f"install-{suffix}.ps1"
+        content = f"""$ErrorActionPreference = 'SilentlyContinue'
+try {{ Wait-Process -Id {os.getpid()} -ErrorAction SilentlyContinue }} catch {{}}
+Start-Sleep -Milliseconds 750
+$env:UV_NO_PROGRESS = '1'
+& {uv_text} tool install --force {wheel_text} *> {log_text}
+$code = $LASTEXITCODE
+$status = if ($code -eq 0) {{ 'success' }} else {{ 'failed' }}
+@{{status=$status; exit_code=$code; version={version_text}}} |
+    ConvertTo-Json -Compress |
+    Set-Content -LiteralPath {result_text} -Encoding UTF8
+Remove-Item -LiteralPath {wheel_text} -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $MyInvocation.MyCommand.Path -Force -ErrorAction SilentlyContinue
+exit $code
+"""
+    else:
+        helper = work_dir / f"install-{suffix}.sh"
+        uv_shell = shlex.quote(uv)
+        wheel_shell = shlex.quote(str(wheel))
+        log_shell = shlex.quote(str(log_path))
+        result_shell = shlex.quote(str(result_path))
+        version_shell = shlex.quote(str(candidate.version))
+        content = f"""#!/bin/sh
+while kill -0 {os.getpid()} 2>/dev/null; do sleep 1; done
+sleep 1
+UV_NO_PROGRESS=1 {uv_shell} tool install --force {wheel_shell} \\
+    >{log_shell} 2>&1
+code=$?
+if [ "$code" -eq 0 ]; then status=success; else status=failed; fi
+printf '{{"status":"%s","exit_code":%s,"version":"%s"}}\n' \\
+    "$status" "$code" {version_shell} >{result_shell}
+rm -f -- {wheel_shell} "$0"
+exit "$code"
+"""
+    try:
+        helper.write_text(content, encoding="utf-8", newline="\n")
+        if sys.platform != "win32":
+            helper.chmod(0o700)
+    except OSError as exc:
+        raise UpdateError(f"Could not create the update helper: {exc}") from exc
+    return helper
+
+
+def _launch_update_helper(helper: Path) -> None:
+    try:
+        if sys.platform == "win32":
+            powershell = (
+                shutil.which("powershell.exe") or shutil.which("pwsh.exe") or shutil.which("pwsh")
+            )
+            if not powershell:
+                raise UpdateError("PowerShell is required to finish the Windows self-update.")
+            subprocess.Popen(
+                [
+                    powershell,
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(helper),
+                ],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                close_fds=True,
+                creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
+            )
+        else:
+            subprocess.Popen(
+                ["/bin/sh", str(helper)],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                close_fds=True,
+                start_new_session=True,
+            )
+    except OSError as exc:
+        raise UpdateError(f"Could not start the update helper: {exc}") from exc
+
+
 def install_update(
     candidate: ReleaseCandidate,
     *,
@@ -588,30 +698,25 @@ def install_update(
             "Reinstall with `uv tool install --force <verified-wheel>` or update it through "
             "the package manager that installed it."
         )
-    with tempfile.TemporaryDirectory(prefix="gpt-image-update-") as temporary:
-        wheel = download_update(
-            candidate,
-            Path(temporary) / candidate.artifact.name,
-            timeout=timeout,
-            explicit_proxy=explicit_proxy,
-            no_proxy=no_proxy,
-        )
-        environment = os.environ.copy()
-        environment["UV_NO_PROGRESS"] = "1"
-        result = subprocess.run(
-            [uv, "tool", "install", "--force", str(wheel)],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=max(120, timeout * 4),
-            env=environment,
-        )
-    if result.returncode != 0:
-        message = (result.stderr or result.stdout).strip()[-1200:]
-        raise UpdateError(f"uv could not install the verified update: {message}")
+    work_dir = _update_work_dir()
+    wheel = download_update(
+        candidate,
+        work_dir / candidate.artifact.name,
+        timeout=timeout,
+        explicit_proxy=explicit_proxy,
+        no_proxy=no_proxy,
+    )
+    helper = _write_update_helper(uv, wheel, candidate)
+    try:
+        _launch_update_helper(helper)
+    except UpdateError:
+        helper.unlink(missing_ok=True)
+        wheel.unlink(missing_ok=True)
+        raise
     return {
         "success": True,
-        "updated": True,
+        "updated": False,
+        "update_scheduled": True,
         "previous_version": __version__,
         "version": str(candidate.version),
         "source": candidate.source,

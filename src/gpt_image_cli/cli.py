@@ -20,7 +20,7 @@ from .models import (
     GenerationOptions,
 )
 from .proxy import ProxyConfig, resolve_proxy_config
-from .updater import check_for_updates, install_update
+from .updater import automatic_update_notice, check_for_updates, install_update
 
 DEFAULT_CC_SWITCH_DB = Path.home() / ".cc-switch" / "cc-switch.db"
 DEFAULT_MODEL = os.getenv("GPT_IMAGE_MODEL", "gpt-image-2")
@@ -326,14 +326,26 @@ def _update(args: argparse.Namespace) -> int:
     return 0
 
 
+def _emit_automatic_update_notice(args: argparse.Namespace) -> None:
+    if getattr(args, "json", False) or not sys.stderr.isatty():
+        return
+    notice = automatic_update_notice()
+    if notice:
+        print(notice, file=sys.stderr)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
         if args.command == "doctor":
-            return _doctor(args)
+            exit_code = _doctor(args)
+            _emit_automatic_update_notice(args)
+            return exit_code
         if args.command == "generate":
-            return _generate(args)
+            exit_code = _generate(args)
+            _emit_automatic_update_notice(args)
+            return exit_code
         if args.command == "update":
             return _update(args)
         parser.error("Unknown command.")

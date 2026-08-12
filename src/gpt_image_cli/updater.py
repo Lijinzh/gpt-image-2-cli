@@ -5,10 +5,12 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import platform
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -32,6 +34,9 @@ USER_AGENT = f"gpt-image-2-cli/{__version__} updater"
 DOWNLOAD_CHUNK_BYTES = 1024 * 1024
 MAX_MANIFEST_BYTES = 256 * 1024
 MAX_WHEEL_BYTES = 64 * 1024 * 1024
+AUTO_CHECK_INTERVAL_SECONDS = 24 * 60 * 60
+AUTO_CHECK_TIMEOUT_SECONDS = 3
+UPDATE_CHECK_DISABLED_ENV = "GPT_IMAGE_DISABLE_UPDATE_CHECK"
 
 
 @dataclass(frozen=True, slots=True)
@@ -116,6 +121,77 @@ class UpdateCheck:
             "checked_sources": list(self.checked_sources),
             "source_errors": self.source_errors,
         }
+
+
+def _update_state_path() -> Path:
+    override = os.getenv("GPT_IMAGE_STATE_DIR", "").strip()
+    if override:
+        return Path(override).expanduser() / "update-state.json"
+    if sys.platform == "win32":
+        root = Path(os.getenv("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+    elif sys.platform == "darwin":
+        root = Path.home() / "Library" / "Caches"
+    else:
+        root = Path(os.getenv("XDG_CACHE_HOME", Path.home() / ".cache"))
+    return root / PACKAGE_NAME / "update-state.json"
+
+
+def _automatic_check_due(path: Path, *, now: float, interval: float) -> bool:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        last_checked = float(payload.get("last_checked", 0))
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        return True
+    return now - last_checked >= interval
+
+
+def _record_automatic_check(path: Path, *, now: float) -> None:
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        temporary.write_text(
+            json.dumps(
+                {
+                    "last_checked": now,
+                    "cli_version": __version__,
+                    "platform": platform.system().lower(),
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        temporary.replace(path)
+    except OSError:
+        return
+
+
+def automatic_update_notice(
+    *,
+    now: float | None = None,
+    interval: float = AUTO_CHECK_INTERVAL_SECONDS,
+    timeout: float = AUTO_CHECK_TIMEOUT_SECONDS,
+    state_path: Path | None = None,
+) -> str | None:
+    """Return a low-frequency update reminder, without changing the installation."""
+    disabled = os.getenv(UPDATE_CHECK_DISABLED_ENV, "").strip().lower()
+    if disabled in {"1", "true", "yes", "on"}:
+        return None
+    timestamp = time.time() if now is None else now
+    path = state_path or _update_state_path()
+    if not _automatic_check_due(path, now=timestamp, interval=interval):
+        return None
+    try:
+        result = check_for_updates(timeout=timeout)
+    except UpdateError:
+        return None
+    _record_automatic_check(path, now=timestamp)
+    if not result.update_available or result.candidate is None:
+        return None
+    candidate = result.candidate
+    return (
+        f"Update available: gpt-image {result.current_version} -> {candidate.version} "
+        f"({candidate.source}). Run `gpt-image update` to install it."
+    )
 
 
 def _headers(source: SourceSpec) -> dict[str, str]:

@@ -142,30 +142,36 @@ function updateCommand() {
 [promptInput, sizeInput, qualityInput].forEach((control) => control?.addEventListener('input', updateCommand));
 updateCommand();
 
+function usePrompt(prompt) {
+  promptInput.value = prompt;
+  updateCommand();
+  document.querySelector('.command-lab').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  window.setTimeout(() => promptInput.focus(), 450);
+}
+
 document.querySelectorAll('[data-use-prompt]').forEach((button) => {
-  button.addEventListener('click', () => {
-    promptInput.value = button.dataset.usePrompt;
-    updateCommand();
-    document.querySelector('.command-lab').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    window.setTimeout(() => promptInput.focus(), 450);
-  });
+  button.addEventListener('click', () => usePrompt(button.dataset.usePrompt));
 });
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-document.querySelectorAll('[data-observatory-carousel]').forEach((carousel) => {
-  const viewport = carousel.querySelector('[data-carousel-viewport]');
-  const track = carousel.querySelector('[data-carousel-track]');
-  const slides = [...carousel.querySelectorAll('[data-carousel-slide]')];
-  const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
-  const label = carousel.querySelector('[data-carousel-label]');
-  const count = carousel.querySelector('[data-carousel-count]');
-  const labels = ['写实版本', '32-bit 像素版本'];
+document.querySelectorAll('[data-gallery-carousel]').forEach((carousel) => {
+  const viewport = carousel.querySelector('[data-gallery-viewport]');
+  const track = carousel.querySelector('[data-gallery-track]');
+  const slides = [...carousel.querySelectorAll('[data-gallery-slide]')];
+  const thumbs = [...carousel.querySelectorAll('[data-gallery-thumb]')];
+  const statusTitle = carousel.querySelector('[data-gallery-status-title]');
+  const count = carousel.querySelector('[data-gallery-count]');
+  const kicker = carousel.querySelector('[data-gallery-kicker]');
+  const title = carousel.querySelector('[data-gallery-title]');
+  const description = carousel.querySelector('[data-gallery-description]');
+  const prompt = carousel.querySelector('[data-gallery-prompt]');
+  const useButton = carousel.querySelector('[data-gallery-use]');
+  const copyButton = carousel.querySelector('[data-gallery-copy]');
   let currentIndex = 0;
-  let autoTimer;
   let pointerStart = null;
 
-  function showSlide(index, userInitiated = false) {
+  function showSlide(index) {
     currentIndex = (index + slides.length) % slides.length;
     track.style.transform = `translateX(-${currentIndex * 100}%)`;
     slides.forEach((slide, slideIndex) => {
@@ -173,43 +179,43 @@ document.querySelectorAll('[data-observatory-carousel]').forEach((carousel) => {
       slide.classList.toggle('is-active', active);
       slide.setAttribute('aria-hidden', String(!active));
     });
-    dots.forEach((dot, dotIndex) => {
-      const active = dotIndex === currentIndex;
-      dot.classList.toggle('is-active', active);
-      dot.setAttribute('aria-current', String(active));
+    thumbs.forEach((thumb, thumbIndex) => {
+      const active = thumbIndex === currentIndex;
+      thumb.classList.toggle('is-active', active);
+      thumb.setAttribute('aria-current', String(active));
     });
-    label.textContent = labels[currentIndex];
-    count.textContent = `${String(currentIndex + 1).padStart(2, '0')} / 02`;
-    if (userInitiated) restartAutoPlay();
-  }
-
-  function restartAutoPlay() {
-    window.clearInterval(autoTimer);
-    if (!reducedMotion) {
-      autoTimer = window.setInterval(() => showSlide(currentIndex + 1), 5200);
+    const activeSlide = slides[currentIndex];
+    statusTitle.textContent = activeSlide.dataset.title;
+    count.textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    kicker.textContent = activeSlide.dataset.kicker;
+    title.textContent = activeSlide.dataset.title;
+    description.textContent = activeSlide.dataset.description;
+    prompt.textContent = activeSlide.dataset.prompt;
+    const activeThumb = thumbs[currentIndex];
+    const thumbRail = activeThumb?.parentElement;
+    if (activeThumb && thumbRail) {
+      const targetLeft = activeThumb.offsetLeft - (thumbRail.clientWidth - activeThumb.clientWidth) / 2;
+      thumbRail.scrollTo({ left: Math.max(0, targetLeft), behavior: reducedMotion ? 'auto' : 'smooth' });
     }
   }
 
-  carousel.querySelector('[data-carousel-previous]')?.addEventListener('click', (event) => {
+  carousel.querySelector('[data-gallery-previous]')?.addEventListener('click', (event) => {
     event.stopPropagation();
-    showSlide(currentIndex - 1, true);
+    showSlide(currentIndex - 1);
   });
-  carousel.querySelector('[data-carousel-next]')?.addEventListener('click', (event) => {
+  carousel.querySelector('[data-gallery-next]')?.addEventListener('click', (event) => {
     event.stopPropagation();
-    showSlide(currentIndex + 1, true);
+    showSlide(currentIndex + 1);
   });
-  dots.forEach((dot, index) => dot.addEventListener('click', (event) => {
+  thumbs.forEach((thumb, index) => thumb.addEventListener('click', (event) => {
     event.stopPropagation();
-    showSlide(index, true);
+    showSlide(index);
   }));
-
-  viewport?.addEventListener('click', (event) => {
-    if (event.target.closest('button')) return;
-    showSlide(currentIndex + 1, true);
-  });
+  copyButton?.addEventListener('click', () => copyText(slides[currentIndex].dataset.prompt));
+  useButton?.addEventListener('click', () => usePrompt(slides[currentIndex].dataset.prompt));
   viewport?.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowRight') showSlide(currentIndex + 1, true);
-    if (event.key === 'ArrowLeft') showSlide(currentIndex - 1, true);
+    if (event.key === 'ArrowRight') showSlide(currentIndex + 1);
+    if (event.key === 'ArrowLeft') showSlide(currentIndex - 1);
   });
   viewport?.addEventListener('pointerdown', (event) => {
     pointerStart = event.clientX;
@@ -219,16 +225,11 @@ document.querySelectorAll('[data-observatory-carousel]').forEach((carousel) => {
     const distance = event.clientX - pointerStart;
     pointerStart = null;
     if (Math.abs(distance) < 46) return;
-    showSlide(currentIndex + (distance < 0 ? 1 : -1), true);
+    showSlide(currentIndex + (distance < 0 ? 1 : -1));
   });
   viewport?.addEventListener('pointercancel', () => { pointerStart = null; });
-  carousel.addEventListener('mouseenter', () => window.clearInterval(autoTimer));
-  carousel.addEventListener('mouseleave', restartAutoPlay);
-  carousel.addEventListener('focusin', () => window.clearInterval(autoTimer));
-  carousel.addEventListener('focusout', restartAutoPlay);
 
   showSlide(0);
-  restartAutoPlay();
 });
 
 if ('IntersectionObserver' in window && !reducedMotion) {

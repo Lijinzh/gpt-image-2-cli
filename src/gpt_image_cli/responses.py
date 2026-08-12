@@ -49,6 +49,10 @@ def _is_http_url(value: str) -> bool:
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
+def _is_base64_data_uri(value: str) -> bool:
+    return value.startswith("data:image/") and ";base64," in value
+
+
 def extract_image_candidates(value: Any) -> list[tuple[str, str]]:
     """Return ordered ``(kind, value)`` candidates from common response shapes."""
 
@@ -75,20 +79,57 @@ def extract_image_candidates(value: Any) -> list[tuple[str, str]]:
                 add("base64", candidate)
         for key in ("url", "image_url"):
             candidate = node.get(key)
-            if isinstance(candidate, str) and _is_http_url(candidate):
-                add("url", candidate)
+            if isinstance(candidate, str):
+                if _is_base64_data_uri(candidate):
+                    add("base64", candidate)
+                elif _is_http_url(candidate):
+                    add("url", candidate)
             elif isinstance(candidate, dict):
                 nested = candidate.get("url")
-                if isinstance(nested, str) and _is_http_url(nested):
-                    add("url", nested)
+                if isinstance(nested, str):
+                    if _is_base64_data_uri(nested):
+                        add("base64", nested)
+                    elif _is_http_url(nested):
+                        add("url", nested)
 
-        for key in ("data", "images", "output", "result"):
+        for key in (
+            "data",
+            "images",
+            "output",
+            "result",
+            "choices",
+            "message",
+            "content",
+            "delta",
+        ):
             child = node.get(key)
             if isinstance(child, (dict, list)):
                 visit(child)
 
     visit(value)
     return found
+
+
+def response_shape(value: Any, *, max_depth: int = 5) -> str:
+    """Describe response containers without exposing image data or long provider text."""
+
+    def visit(node: Any, depth: int) -> Any:
+        if depth >= max_depth:
+            return "..."
+        if isinstance(node, dict):
+            return {str(key): visit(child, depth + 1) for key, child in node.items()}
+        if isinstance(node, list):
+            preview = [visit(child, depth + 1) for child in node[:2]]
+            if len(node) > 2:
+                preview.append(f"... {len(node)} items")
+            return preview
+        if isinstance(node, str):
+            return f"<string length={len(node)}>"
+        if node is None:
+            return None
+        return f"<{type(node).__name__}>"
+
+    return json.dumps(visit(value, 0), ensure_ascii=False)[:2000]
 
 
 def decode_json_or_sse(body: bytes, content_type: str) -> Any:

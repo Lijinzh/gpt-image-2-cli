@@ -26,3 +26,10 @@ class GenerationError(CliError):
     def __init__(self, message: str, *, possibly_billed: bool = False) -> None:
         super().__init__(message)
         self.possibly_billed = possibly_billed
+
+
+class UpdateError(CliError):
+    """Version discovery, download verification, or self-update failed."""
+
+    exit_code = 5
+    label = "UPDATE ERROR"

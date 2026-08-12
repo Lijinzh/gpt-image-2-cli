@@ -152,69 +152,75 @@
     <section class="examples" id="examples" aria-labelledby="examples-title">
       <div class="section-heading" data-reveal>
         <p><span>03</span> IMAGE GALLERY</p>
-        <h2 id="examples-title">提示词先看得见，再拿去生成。</h2>
-        <p class="section-heading__lead">所有示意图均清楚标注来源。点击任意提示词，可直接送进上面的命令实验台。</p>
+        <h2 id="examples-title">八部电影，八种像素叙事。</h2>
+        <p class="section-heading__lead">使用左右大按钮、键盘方向键或触摸滑动浏览场景。每张图都配有完整测试提示词，可一键送入上面的命令实验台。</p>
       </div>
-      <div class="gallery">
-        <article class="gallery-item gallery-item--wide gallery-item--observatory" data-reveal data-observatory-carousel aria-roledescription="轮播图" aria-label="雪山湖畔未来观测站：写实与 32-bit 像素版本">
-          <div class="observatory-carousel" data-carousel-viewport tabindex="0">
-            <div class="observatory-carousel__track" data-carousel-track>
-              <figure class="observatory-slide is-active" data-carousel-slide aria-hidden="false">
-                <img src="assets/examples/observatory-photorealistic.png" alt="雪山湖畔未来观测站的写实生成图" width="1536" height="1024" loading="lazy">
-                <figcaption>REALISTIC CLI OUTPUT / 1536 × 1024</figcaption>
-              </figure>
-              <figure class="observatory-slide observatory-slide--pixel" data-carousel-slide aria-hidden="true">
-                <img src="assets/examples/pixel-snow-observatory.png" alt="同一雪山湖畔未来观测站的精细 32-bit 街机像素版本" width="1536" height="1024" loading="lazy">
-                <figcaption>DETAILED 32-BIT PIXEL SCENE / 1536 × 1024</figcaption>
-              </figure>
-            </div>
-            <button class="observatory-carousel__arrow observatory-carousel__arrow--previous" type="button" data-carousel-previous aria-label="查看上一张：写实版本">
-              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 9 15 24l15 15M16 24h23"/></svg>
-            </button>
-            <button class="observatory-carousel__arrow observatory-carousel__arrow--next" type="button" data-carousel-next aria-label="查看下一张：32-bit 像素版本">
-              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="m18 9 15 15-15 15M32 24H9"/></svg>
-            </button>
-            <div class="observatory-carousel__status" aria-live="polite" aria-atomic="true">
-              <span data-carousel-label>写实版本</span>
-              <span data-carousel-count>01 / 02</span>
-            </div>
-            <div class="observatory-carousel__dots" aria-label="选择观测站图片">
-              <button class="is-active" type="button" data-carousel-dot="0" aria-label="查看写实版本" aria-current="true"></button>
-              <button type="button" data-carousel-dot="1" aria-label="查看 32-bit 像素版本" aria-current="false"></button>
-            </div>
-            <p class="observatory-carousel__hint">点击图片或箭头切换 · 触摸左右滑动</p>
+      <div class="cinema-gallery" data-gallery-carousel data-reveal aria-roledescription="轮播图" aria-label="电影场景高精度像素艺术画廊">
+        <div class="cinema-gallery__stage" data-gallery-viewport tabindex="0">
+          <div class="cinema-gallery__track" data-gallery-track>
+            <figure class="cinema-gallery__slide is-active" data-gallery-slide data-title="双日落 · 星球大战灵感" data-kicker="SPACE OPERA / SCENE 01" data-description="双日、沙丘、原创勘探车与远景飞船构成太空歌剧画面，适合测试大气分层、逆光轮廓和机械材质。" data-prompt="An original retro space-opera landscape on a vast alien desert ridge beneath two setting suns, with a rugged six-wheeled survey rover, tall communications mast and tiny cargo spacecraft far away. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, layered dunes and atmospheric perspective, cinematic orange-violet rim light, realistic weathered metal and sand textures, crisp silhouettes, wide establishing shot, no text, no logo, no watermark, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original vehicle designs." aria-hidden="false">
+              <img src="assets/examples/star-wars-twin-sunset.png" alt="双日落沙漠中冒险者与机器人眺望战机的高精度像素场景" width="1536" height="1024">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="月面黑石 · 2001 太空漫游" data-kicker="SCI-FI MINIMALISM / SCENE 02" data-description="克制的黑白蓝配色与对称月面构图，用于测试硬阴影、几何秩序、宇航服和机械设施的细节表现。" data-prompt="A silent lunar excavation site where two astronauts in retro-futurist white suits stand before a perfectly black rectangular monolith, Earth low above the horizon, geometric floodlights casting long hard shadows across detailed regolith and machinery. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, disciplined symmetrical widescreen composition, restrained white charcoal black and cobalt palette, physically convincing suit joints and equipment, cinematic depth, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting." aria-hidden="true">
+              <img src="assets/examples/space-odyssey-monolith.png" alt="宇航员站在月面黑色石碑前的高精度像素场景" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="城门决斗 · 特洛伊" data-kicker="BRONZE AGE EPIC / SCENE 03" data-description="青铜时代武士、巨型城门与纵深军阵组成史诗场面，适合测试历史服饰、多人阵列、尘土和石材纹理。" data-prompt="Two legendary Bronze Age warriors facing each other outside colossal ancient city gates, one carrying a round shield and tall-crested helmet, spear formations and soldiers receding into dusty depth, towering stone walls and banners under a blood-orange sunset. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, archaeologically grounded bronze armor, leather and woven cloth, dramatic dust and backlight, epic widescreen composition, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting." aria-hidden="true">
+              <img src="assets/examples/troy-gates-duel.png" alt="特洛伊城门前两名青铜时代武士决斗的高精度像素场景" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="雨夜高空 · 蜘蛛侠灵感" data-kicker="URBAN RESCUE NOIR / SCENE 04" data-description="雨幕、闪电、都市窗光、维修无人机与高空作业员组成原创都市救援场景，适合测试湿地反射和高对比夜景。" data-prompt="An original futuristic high-altitude rescue operation above a rain-soaked megacity: a compact yellow maintenance drone stretches a luminous safety cable between two rooftops while a helmeted utility worker in teal weather gear secures an antenna platform, lightning revealing dense skyscrapers, traffic and thousands of windows. Extreme horizontal widescreen establishing composition with the small worker in the left third and a broad city panorama filling the frame. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, dynamic low three-quarter camera, believable industrial equipment, wet reflections, deep navy teal and electric-yellow palette, cinematic rain and rim light, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original designs." aria-hidden="true">
+              <img src="assets/examples/spider-hero-rooftop.png" alt="红蓝蛛网英雄蹲伏在雨夜城市屋顶的高精度像素场景" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="装甲工坊 · 钢铁侠灵感" data-kicker="ARMORED TECHNOLOGY / SCENE 05" data-description="原创外骨骼、机械臂、陈列舱与全息界面形成密集科技场景，适合测试金属高光、发光核心和机械结构。" data-prompt="Inside a luminous underground technology workshop, an original copper-and-crimson exosuit engineer stands at the center while multi-axis robotic arms calibrate a hexagonal torso power cell, illuminated display bays holding industrial suit modules and abstract cyan holographic diagrams. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, dense readable machinery, realistic brushed metal and reflections, warm amber versus cool blue lighting, cinematic widescreen depth, no readable text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original armor design." aria-hidden="true">
+              <img src="assets/examples/iron-hero-workshop.png" alt="红金装甲英雄在机械臂环绕的科技工坊中的高精度像素场景" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="城市集结 · 复仇者联盟灵感" data-kicker="ENSEMBLE BATTLE / SCENE 06" data-description="六位原创救援英雄在受损街道集结，适合测试多人可读性、爆炸、飞行器、碎片与城市空间层次。" data-prompt="Six entirely original emergency-response champions forming a defensive circle in a shattered metropolitan avenue: a jetpack engineer, kinetic-shield guardian, weather channeler, massive stone rescue specialist, agile scout and precision archer, while unknown aircraft weave between towers and explosions throw debris and sparks through the street. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, readable ensemble silhouettes, layered urban destruction, bold comic palette with cinematic volumetric light, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original costumes and insignia." aria-hidden="true">
+              <img src="assets/examples/avengers-city-battle.png" alt="六名超级英雄在受损城市街道集结迎战飞行器的高精度像素场景" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="地下走廊 · 沉默的羔羊灵感" data-kicker="PSYCHOLOGICAL THRILLER / SCENE 07" data-description="单点透视、冷绿荧光灯和玻璃隔离室制造压迫感，适合测试室内纵深、低饱和色彩与克制的人物情绪。" data-prompt="An original forensic interviewer at the end of a cold underground detention corridor facing an anonymous high-security detainee behind reinforced glass, guards and barred cells fading into darkness on both sides. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, strict one-point perspective and oppressive symmetry, realistic tiled walls, glass reflections and restrained expressions, fluorescent green-gray light with tiny dark-red accents, psychological tension without gore, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original characters." aria-hidden="true">
+              <img src="assets/examples/silence-prison-corridor.png" alt="调查员面对地下监狱玻璃牢房中囚犯的高精度像素场景" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="雨夜教堂 · 康斯坦丁灵感" data-kicker="OCCULT NOIR / SCENE 08" data-description="哥特拱顶、彩窗光束、雨水倒影和超自然烟影共同形成神秘黑色电影气质，适合测试暗部层次与彩色光源。" data-prompt="An original weary paranormal archivist in a charcoal raincoat standing in a rain-lashed Gothic cathedral aisle, holding a small flame while supernatural smoke coils beneath ribbed vaults, stained glass casting gold and crimson shafts across reflective wet stone. Premium high-density 1990s arcade pixel art, extreme horizontal widescreen composition showing the full nave from left transept to right transept, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, intricate carved architecture, believable coat and skin texture, dramatic chiaroscuro, amber teal and deep-red palette, cinematic noir depth, no readable text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original character design." aria-hidden="true">
+              <img src="assets/examples/constantine-cathedral.png" alt="驱魔人站在雨夜哥特教堂彩窗光线中的高精度像素场景" width="1536" height="1024" loading="lazy">
+            </figure>
           </div>
-          <div class="gallery-item__copy">
-            <span>写实生成图 × 32-bit 像素场景</span>
-            <h3>雪山湖畔的未来观测站</h3>
-            <p>左右切换同一主题的两个视觉方向：接近实物摄影的生成结果，以及拥有分层雪山、湖面反射、机械设施和完整宇航员角色的精细街机像素版本。</p>
-            <button type="button" data-use-prompt="雪山湖畔的未来观测站，复杂的圆顶天文台、着装精细的太空操作员、湖面反射与远山层次，32-bit 街机像素游戏场景，丰富机械细节与戏剧性灯光，无文字、无 Logo">使用像素版提示词</button>
+
+          <button class="cinema-gallery__arrow cinema-gallery__arrow--previous" type="button" data-gallery-previous aria-label="查看上一个电影场景">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 9 15 24l15 15M16 24h23"/></svg>
+          </button>
+          <button class="cinema-gallery__arrow cinema-gallery__arrow--next" type="button" data-gallery-next aria-label="查看下一个电影场景">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path d="m18 9 15 15-15 15M32 24H9"/></svg>
+          </button>
+          <div class="cinema-gallery__status" aria-live="polite" aria-atomic="true">
+            <span data-gallery-status-title>双日落 · 星球大战灵感</span>
+            <strong data-gallery-count>01 / 08</strong>
           </div>
-        </article>
-        <article class="gallery-item" data-reveal>
-          <figure><img src="assets/examples/star-wars-pixel-art.png" alt="双日落沙漠与太空歌剧角色的像素风示意图" width="1280" height="768" loading="lazy"><figcaption>REPRODUCIBLE PIXEL PREVIEW</figcaption></figure>
-          <div class="gallery-item__copy">
-            <span>可复现示意图</span><h3>双日落 · 像素太空歌剧</h3>
-            <p>非官方致敬风格，不含官方 Logo；由仓库脚本确定性绘制。</p>
-            <button type="button" data-use-prompt="双日落下的沙漠山脊，年轻的太空冒险者与蓝白机器人眺望远方战机，16-bit 像素艺术，复古游戏配色，无文字、无 Logo">使用这个提示词</button>
+          <p class="cinema-gallery__hint">← → 键盘切换 · 触摸左右滑动</p>
+        </div>
+
+        <div class="cinema-gallery__details">
+          <div class="cinema-gallery__copy" aria-live="polite" aria-atomic="true">
+            <span data-gallery-kicker>SPACE OPERA / SCENE 01</span>
+            <h3 data-gallery-title>双日落 · 星球大战灵感</h3>
+            <p data-gallery-description>双日、沙丘、原创勘探车与远景飞船构成太空歌剧画面，适合测试大气分层、逆光轮廓和机械材质。</p>
           </div>
-        </article>
-        <article class="gallery-item" data-reveal>
-          <figure><img src="assets/examples/cyberpunk-courier-pixel-art.png" alt="雨夜霓虹城市中的机甲快递员像素示意图" width="1280" height="768" loading="lazy"><figcaption>REPRODUCIBLE PIXEL PREVIEW</figcaption></figure>
-          <div class="gallery-item__copy">
-            <span>可复现示意图</span><h3>霓虹雨城 · 机甲快递员</h3>
-            <p>蓝紫霓虹、密集高楼与反光街面，适合测试像素风场景。</p>
-            <button type="button" data-use-prompt="雨夜霓虹街道上的像素风机甲快递员，16-bit RPG 场景，蓝紫配色，无文字">使用这个提示词</button>
+          <div class="cinema-gallery__prompt">
+            <div><span>PROMPT.TXT</span><button type="button" data-gallery-copy>复制提示词</button></div>
+            <code data-gallery-prompt>An original retro space-opera landscape on a vast alien desert ridge beneath two setting suns, with a rugged six-wheeled survey rover, tall communications mast and tiny cargo spacecraft far away. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, layered dunes and atmospheric perspective, cinematic orange-violet rim light, realistic weathered metal and sand textures, crisp silhouettes, wide establishing shot, no text, no logo, no watermark, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original vehicle designs.</code>
           </div>
-        </article>
-        <article class="gallery-item" data-reveal>
-          <figure><img src="assets/examples/great-wall-starfleet-pixel-art.png" alt="长城日出云海与星舰编队的像素示意图" width="1280" height="768" loading="lazy"><figcaption>REPRODUCIBLE PIXEL PREVIEW</figcaption></figure>
-          <div class="gallery-item__copy">
-            <span>可复现示意图</span><h3>长城云海 · 星舰编队</h3>
-            <p>中国科幻与复古街机色彩的组合，适合测试宽幅叙事构图。</p>
-            <button type="button" data-use-prompt="长城上空的像素风星舰编队，日出云海，复古街机美术，宽幅构图，无文字">使用这个提示词</button>
-          </div>
-        </article>
+          <button class="pixel-button pixel-button--lime cinema-gallery__use" type="button" data-gallery-use>送入命令实验台</button>
+          <p class="cinema-gallery__legal">非官方像素艺术致敬示例；不含官方 Logo、电影截图或演员肖像。8 张大图均由本仓库 CLI 调用 gpt-image-2 生成。</p>
+        </div>
+
+        <div class="cinema-gallery__thumbs" data-gallery-thumbs aria-label="选择电影场景">
+          <button class="is-active" type="button" data-gallery-thumb="0" aria-current="true"><img src="assets/examples/star-wars-twin-sunset.png" alt=""><span>星球大战</span></button>
+          <button type="button" data-gallery-thumb="1" aria-current="false"><img src="assets/examples/space-odyssey-monolith.png" alt=""><span>太空漫游</span></button>
+          <button type="button" data-gallery-thumb="2" aria-current="false"><img src="assets/examples/troy-gates-duel.png" alt=""><span>特洛伊</span></button>
+          <button type="button" data-gallery-thumb="3" aria-current="false"><img src="assets/examples/spider-hero-rooftop.png" alt=""><span>蜘蛛侠</span></button>
+          <button type="button" data-gallery-thumb="4" aria-current="false"><img src="assets/examples/iron-hero-workshop.png" alt=""><span>钢铁侠</span></button>
+          <button type="button" data-gallery-thumb="5" aria-current="false"><img src="assets/examples/avengers-city-battle.png" alt=""><span>复仇者联盟</span></button>
+          <button type="button" data-gallery-thumb="6" aria-current="false"><img src="assets/examples/silence-prison-corridor.png" alt=""><span>沉默的羔羊</span></button>
+          <button type="button" data-gallery-thumb="7" aria-current="false"><img src="assets/examples/constantine-cathedral.png" alt=""><span>康斯坦丁</span></button>
+        </div>
       </div>
     </section>
 

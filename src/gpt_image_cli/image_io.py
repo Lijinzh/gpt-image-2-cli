@@ -45,6 +45,35 @@ def inspect_image(data: bytes) -> tuple[str, int, int]:
     return image_format.upper(), width, height
 
 
+def fit_image(data: bytes, expected_size: tuple[int, int]) -> bytes:
+    """Center-crop and resize an image to an explicitly requested canvas."""
+
+    try:
+        with Image.open(io.BytesIO(data)) as image:
+            image.load()
+            target_width, target_height = expected_size
+            source_width, source_height = image.size
+            source_ratio = source_width / source_height
+            target_ratio = target_width / target_height
+            if source_ratio > target_ratio:
+                crop_width = round(source_height * target_ratio)
+                left = (source_width - crop_width) // 2
+                box = (left, 0, left + crop_width, source_height)
+            else:
+                crop_height = round(source_width / target_ratio)
+                top = (source_height - crop_height) // 2
+                box = (0, top, source_width, top + crop_height)
+            fitted = image.crop(box).resize(expected_size, Image.Resampling.LANCZOS)
+            output = io.BytesIO()
+            fitted.save(output, format="PNG", optimize=True)
+            return output.getvalue()
+    except (UnidentifiedImageError, OSError, ValueError) as exc:
+        raise GenerationError(
+            "The API response could not be fitted to the requested size.",
+            possibly_billed=True,
+        ) from exc
+
+
 def _output_paths(output: Path, formats: list[str]) -> list[Path]:
     output = output.expanduser().resolve()
     count = len(formats)
@@ -81,9 +110,35 @@ def _write_atomic(path: Path, data: bytes, *, overwrite: bool) -> None:
 
 
 def save_images(
-    output: Path, images: tuple[ImagePayload, ...], *, overwrite: bool
+    output: Path,
+    images: tuple[ImagePayload, ...],
+    *,
+    overwrite: bool,
+    expected_size: tuple[int, int] | None = None,
+    fit_output_size: bool = False,
 ) -> list[ImageInfo]:
+    if fit_output_size and expected_size is None:
+        raise GenerationError("Fitting output size requires an explicit requested size.")
+    if fit_output_size and expected_size is not None:
+        images = tuple(
+            ImagePayload(fit_image(image.data, expected_size), image.source)
+            for image in images
+        )
     inspected = [inspect_image(image.data) for image in images]
+    if expected_size is not None:
+        mismatches = [
+            (width, height)
+            for _image_format, width, height in inspected
+            if (width, height) != expected_size
+        ]
+        if mismatches:
+            actual = ", ".join(f"{width}x{height}" for width, height in mismatches)
+            expected = f"{expected_size[0]}x{expected_size[1]}"
+            raise GenerationError(
+                f"The API ignored the requested image size. Expected {expected}; got {actual}. "
+                "No output file was written.",
+                possibly_billed=True,
+            )
     paths = _output_paths(output, [item[0] for item in inspected])
 
     if not overwrite:

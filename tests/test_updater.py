@@ -14,6 +14,7 @@ from gpt_image_cli.updater import (
     UpdateArtifact,
     _parse_manifest,
     _verify_wheel,
+    automatic_update_notice,
     check_for_updates,
 )
 
@@ -111,3 +112,39 @@ def test_wheel_verification_checks_embedded_name_and_version(tmp_path: Path) -> 
         release_url=None,
     )
     _verify_wheel(wheel, release)
+
+
+def test_automatic_notice_is_rate_limited(monkeypatch: object, tmp_path: Path) -> None:
+    state_path = tmp_path / "state" / "update-state.json"
+    release = candidate("github", "0.3.0")
+    calls = 0
+
+    def fake_check(**_kwargs: object) -> object:
+        nonlocal calls
+        calls += 1
+        from gpt_image_cli.updater import UpdateCheck
+
+        return UpdateCheck(
+            current_version=Version("0.2.0"),
+            candidate=release,
+            checked_sources=("github",),
+            source_errors={},
+        )
+
+    monkeypatch.setattr("gpt_image_cli.updater.check_for_updates", fake_check)
+    first = automatic_update_notice(now=1000, interval=100, state_path=state_path)
+    second = automatic_update_notice(now=1050, interval=100, state_path=state_path)
+    third = automatic_update_notice(now=1101, interval=100, state_path=state_path)
+    assert "0.2.0 -> 0.3.0" in (first or "")
+    assert second is None
+    assert "gpt-image update" in (third or "")
+    assert calls == 2
+
+
+def test_automatic_notice_can_be_disabled(monkeypatch: object, tmp_path: Path) -> None:
+    monkeypatch.setenv("GPT_IMAGE_DISABLE_UPDATE_CHECK", "1")
+    monkeypatch.setattr(
+        "gpt_image_cli.updater.check_for_updates",
+        lambda **_kwargs: pytest.fail("disabled update check should not use the network"),
+    )
+    assert automatic_update_notice(state_path=tmp_path / "state.json") is None

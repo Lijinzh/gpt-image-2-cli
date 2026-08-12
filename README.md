@@ -90,6 +90,16 @@ uv tool install "git+https://github.com/Lijinzh/gpt-image-2-cli.git"
 
 ## 自动更新
 
+CLI 会在交互式运行 `doctor` 或 `generate` 成功后，最多每 24 小时检查一次正式 Release。
+检查超时很短、失败时保持安静，也不会自动修改安装；只有发现更新时才显示类似提示：
+
+```text
+Update available: gpt-image 0.2.0 -> 0.3.0 (gitee). Run `gpt-image update` to install it.
+```
+
+脚本或 CI 使用 `--json` 时不会插入提醒。如需完全关闭低频检查，可设置
+`GPT_IMAGE_DISABLE_UPDATE_CHECK=1`；仍然可以随时手动运行 `gpt-image update --check`。
+
 只检查版本，不修改安装：
 
 ```powershell

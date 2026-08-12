@@ -1,13 +1,84 @@
 const menuButton = document.querySelector('[data-menu-button]');
 const siteNav = document.querySelector('[data-site-nav]');
 const toast = document.querySelector('[data-copy-toast]');
+const isEnglish = document.documentElement.lang.toLowerCase().startsWith('en');
+const messages = isEnglish ? {
+  copied: 'Copied to clipboard',
+  otherFeedback: 'Other feedback',
+  subjectFallback: 'Add a short title',
+  detailsFallback: 'Add the details',
+  notProvided: 'Not provided',
+  feedbackType: 'Feedback type',
+  details: 'Details',
+  steps: 'Steps or context',
+  environment: 'Environment',
+  issueFooter: 'Prepared on the GPT-Image 2 CLI website. Never paste API keys or other sensitive information into a public issue.',
+  longFeedback: 'The feedback is too long for the URL. The full text is already in your clipboard; paste it here with Ctrl+V (Command+V on macOS).',
+  promptFallback: 'your prompt',
+} : {
+  copied: '已复制到剪贴板',
+  otherFeedback: '其他意见',
+  subjectFallback: '请填写一句话标题',
+  detailsFallback: '请填写详细说明',
+  notProvided: '未提供',
+  feedbackType: '反馈类型',
+  details: '详细说明',
+  steps: '操作步骤或上下文',
+  environment: '使用环境',
+  issueFooter: '通过 GPT-Image 2 CLI 项目网页整理。请勿在公开 Issue 中粘贴 API Key 或其他敏感信息。',
+  longFeedback: '反馈内容较长，网页已经把完整内容复制到剪贴板。请在这里按 Ctrl+V（macOS 使用 Command+V）粘贴。',
+  promptFallback: '你的提示词',
+};
 let toastTimer;
 
-function showToast(message = '已复制到剪贴板') {
+const visualThemes = new Set(['cosmic', 'silence', 'occult']);
+const themeButtons = [...document.querySelectorAll('[data-theme]')];
+
+function applyVisualTheme(theme, persist = true) {
+  const selectedTheme = visualThemes.has(theme) ? theme : 'cosmic';
+  document.body.dataset.visualTheme = selectedTheme;
+  themeButtons.forEach((button) => {
+    const active = button.dataset.theme === selectedTheme;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  if (persist) {
+    try {
+      window.localStorage.setItem('gpt-image-site-visual-theme', selectedTheme);
+    } catch {
+      // Theme switching still works when storage is unavailable.
+    }
+  }
+}
+
+try {
+  applyVisualTheme(window.localStorage.getItem('gpt-image-site-visual-theme') || 'cosmic', false);
+} catch {
+  applyVisualTheme('cosmic', false);
+}
+
+themeButtons.forEach((button) => {
+  button.addEventListener('click', () => applyVisualTheme(button.dataset.theme));
+});
+
+function showToast(message = messages.copied) {
   toast.textContent = message;
   toast.classList.add('is-visible');
   window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 1800);
+}
+
+const languageParam = new URLSearchParams(window.location.search).get('lang');
+try {
+  if (languageParam === 'zh' || languageParam === 'en') {
+    window.localStorage.setItem('gpt-image-site-language', languageParam);
+    const cleanUrl = `${window.location.pathname}${window.location.hash}`;
+    window.history.replaceState(null, '', cleanUrl);
+  } else if (!isEnglish && window.localStorage.getItem('gpt-image-site-language') === 'en') {
+    window.location.replace('en/');
+  }
+} catch {
+  // Language selection still works through normal links when storage is unavailable.
 }
 
 async function copyText(text) {
@@ -57,27 +128,27 @@ const feedbackEnvironment = document.querySelector('[data-feedback-environment]'
 const feedbackIssueBase = 'https://github.com/Lijinzh/gpt-image-2-cli/issues/new';
 
 function feedbackDraft() {
-  const category = feedbackCategory?.selectedOptions[0]?.textContent.trim() || '其他意见';
-  const subject = feedbackSubject?.value.trim() || '请填写一句话标题';
-  const details = feedbackDetails?.value.trim() || '请填写详细说明';
-  const steps = feedbackSteps?.value.trim() || '未提供';
-  const environment = feedbackEnvironment?.value.trim() || '未提供';
+  const category = feedbackCategory?.selectedOptions[0]?.textContent.trim() || messages.otherFeedback;
+  const subject = feedbackSubject?.value.trim() || messages.subjectFallback;
+  const details = feedbackDetails?.value.trim() || messages.detailsFallback;
+  const steps = feedbackSteps?.value.trim() || messages.notProvided;
+  const environment = feedbackEnvironment?.value.trim() || messages.notProvided;
   const body = [
     '<!-- website-feedback -->',
-    '## 反馈类型',
+    `## ${messages.feedbackType}`,
     category,
     '',
-    '## 详细说明',
+    `## ${messages.details}`,
     details,
     '',
-    '## 操作步骤或上下文',
+    `## ${messages.steps}`,
     steps,
     '',
-    '## 使用环境',
+    `## ${messages.environment}`,
     environment,
     '',
     '---',
-    '通过 GPT-Image 2 CLI 项目网页整理。请勿在公开 Issue 中粘贴 API Key 或其他敏感信息。',
+    messages.issueFooter,
   ].join('\n');
   return { title: `[Website Feedback] ${subject}`, body };
 }
@@ -121,7 +192,7 @@ feedbackForm?.addEventListener('submit', async (event) => {
     await copyText(`${draft.title}\n\n${draft.body}`);
     issueUrl.searchParams.set(
       'body',
-      '反馈内容较长，网页已经把完整内容复制到剪贴板。请在这里按 Ctrl+V（macOS 使用 Command+V）粘贴。',
+      messages.longFeedback,
     );
   }
   window.location.assign(issueUrl.toString());
@@ -135,7 +206,7 @@ const qualityInput = document.querySelector('[data-quality]');
 const commandOutput = document.querySelector('[data-command-output]');
 
 function updateCommand() {
-  const prompt = promptInput.value.trim().replaceAll('"', '\\"') || '你的提示词';
+  const prompt = promptInput.value.trim().replaceAll('"', '\\"') || messages.promptFallback;
   commandOutput.textContent = `gpt-image generate "${prompt}" --size ${sizeInput.value} --quality ${qualityInput.value} -o .\\artifacts\\result.png`;
 }
 

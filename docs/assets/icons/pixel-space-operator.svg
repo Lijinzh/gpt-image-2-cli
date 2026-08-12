@@ -1,12 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-labelledby="title">
-  <title id="title">GPT-Image CLI pixel space operator</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">GPT-Image CLI pixel image operator</title>
   <g shape-rendering="crispEdges">
-    <rect width="32" height="32" fill="#050713"/>
-    <rect x="1" y="1" width="30" height="30" fill="#0a1027" stroke="#13f4ef" stroke-width="2"/>
-    <path fill="#f7f4ff" d="M9 6h14v3h2v11h-2v4H9v-4H7V9h2z"/>
-    <path fill="#111a3c" d="M9 10h14v9H9z"/>
-    <path fill="#b8ff4a" d="M11 12h3v3h-3zm7 0h3v3h-3z"/>
-    <path fill="#13f4ef" d="M14 16h4v2h-4zM23 12h4v6h-4zM3 25h4v4H3z"/>
-    <path fill="#ff3bd4" d="M5 12h3v6H5zm6 12h10v3H11zM25 4h4v4h-4z"/>
+    <rect width="64" height="64" fill="#050713"/>
+    <rect x="2" y="2" width="60" height="60" fill="#09112b" stroke="#13f4ef" stroke-width="3"/>
+    <path fill="#263466" d="M8 8h16v2H10v14H8zm32 0h16v16h-2V10H40zM8 40h2v14h14v2H8zm46 0h2v16H40v-2h14z"/>
+    <path fill="#ff3bd4" d="M29 5h6v7h-6zM24 4h16v3H24zM6 27h7v13H6zm45 0h7v13h-7z"/>
+    <path fill="#f7f4ff" d="M18 14h28v5h5v23h-5v5H18v-5h-5V19h5z"/>
+    <path fill="#10183a" d="M18 20h28v19H18z"/>
+    <path fill="#13f4ef" d="M21 23h8v7h-8zm22 0h3v16h-3zM29 33h7v4h-7z"/>
+    <path fill="#b8ff4a" d="M23 25h6v5h-6zm13 0h6v5h-6z"/>
+    <path fill="#ff3bd4" d="M20 42h24v5H20zm7 5h11v4H27z"/>
+    <path fill="#b8ff4a" d="M29 45h7v9h-7z"/>
+    <path fill="#13f4ef" d="M10 49h7v7h-7zm40-41h7v7h-7z"/>
+    <path fill="#ffb45e" d="M47 17h5v5h-5z"/>
   </g>
 </svg>

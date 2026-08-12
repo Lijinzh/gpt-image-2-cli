@@ -9,16 +9,19 @@
   <meta property="og:description" content="安装、配置、预演、生成。把 GPT-Image 工作流安全地带进终端。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://lijinzh.github.io/gpt-image-2-cli/">
-  <meta property="og:image" content="https://lijinzh.github.io/gpt-image-2-cli/assets/examples/star-wars-pixel-art.png">
+  <meta property="og:image" content="https://lijinzh.github.io/gpt-image-2-cli/assets/examples/star-wars-twin-sunset.png">
   <title>GPT-Image 2 CLI · Turn prompts into pixels</title>
   <link rel="canonical" href="https://lijinzh.github.io/gpt-image-2-cli/">
+  <link rel="alternate" hreflang="zh-CN" href="https://lijinzh.github.io/gpt-image-2-cli/">
+  <link rel="alternate" hreflang="en" href="https://lijinzh.github.io/gpt-image-2-cli/en/">
+  <link rel="alternate" hreflang="x-default" href="https://lijinzh.github.io/gpt-image-2-cli/">
   <link rel="icon" href="assets/icons/pixel-space-operator.svg" type="image/svg+xml">
   <link rel="icon" href="assets/icons/pixel-space-operator.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/icons/pixel-space-operator.png">
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
 </head>
-<body>
+<body data-visual-theme="cosmic">
   <a class="skip-link" href="#main-content">跳到主要内容</a>
 
   <div class="signal-strip" aria-hidden="true">
@@ -41,6 +44,10 @@
       <a href="#reliability">可靠性</a>
       <a href="#safety">安全</a>
       <a href="#feedback">反馈</a>
+    </nav>
+    <nav class="language-switch" aria-label="语言切换">
+      <a class="is-active" href="./?lang=zh" lang="zh-CN" hreflang="zh-CN" aria-current="page">中文</a>
+      <a href="en/?lang=en" lang="en" hreflang="en">EN</a>
     </nav>
     <a class="header-github" href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">
       <span>LIJINZH / GITHUB</span>
@@ -68,14 +75,25 @@
       </div>
 
       <div class="hero__scene" aria-hidden="true" data-reveal>
-        <div class="pixel-moon"><span></span></div>
-        <div class="city city--back">
-          <i style="--x:2%;--w:12%;--h:38%"></i><i style="--x:17%;--w:10%;--h:28%"></i>
-          <i style="--x:30%;--w:14%;--h:48%"></i><i style="--x:48%;--w:11%;--h:34%"></i>
-          <i style="--x:62%;--w:15%;--h:58%"></i><i style="--x:81%;--w:16%;--h:30%"></i>
+        <div class="operator-orbit">
+          <span class="operator-orbit__ring operator-orbit__ring--outer"></span>
+          <span class="operator-orbit__ring operator-orbit__ring--inner"></span>
+          <span class="operator-orbit__node operator-orbit__node--one"></span>
+          <span class="operator-orbit__node operator-orbit__node--two"></span>
+          <span class="operator-orbit__node operator-orbit__node--three"></span>
+          <div class="operator-orbit__core">
+            <img src="assets/icons/pixel-space-operator.png" alt="" width="256" height="256">
+          </div>
+          <div class="operator-orbit__caption"><span>IMAGE OPERATOR</span><strong>READY / 02</strong></div>
         </div>
-        <div class="city-grid"></div>
         <div class="scene-status"><span>RELAY</span><strong>ONLINE</strong><span>MODEL</span><strong>GPT-IMAGE-2</strong></div>
+      </div>
+
+      <div class="theme-switcher" role="group" aria-label="切换首页视觉主题" data-theme-switcher>
+        <span>SCENE</span>
+        <button class="is-active" type="button" data-theme="cosmic" aria-pressed="true">双日远境</button>
+        <button type="button" data-theme="silence" aria-pressed="false">静默走廊</button>
+        <button type="button" data-theme="occult" aria-pressed="false">黑金圣堂</button>
       </div>
     </section>
 

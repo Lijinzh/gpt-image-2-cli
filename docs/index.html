@@ -12,7 +12,9 @@
   <meta property="og:image" content="https://lijinzh.github.io/gpt-image-2-cli/assets/examples/star-wars-pixel-art.png">
   <title>GPT-Image 2 CLI · Turn prompts into pixels</title>
   <link rel="canonical" href="https://lijinzh.github.io/gpt-image-2-cli/">
-  <link rel="icon" href="assets/icons/pixel-terminal.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icons/pixel-space-operator.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icons/pixel-space-operator.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icons/pixel-space-operator.png">
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
 </head>
@@ -26,7 +28,7 @@
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="GPT-Image 2 CLI 首页">
-      <span class="brand__mark" aria-hidden="true">GI</span>
+      <span class="brand__mark" aria-hidden="true"><img src="assets/icons/pixel-space-operator.png" alt="" width="48" height="48"></span>
       <span class="brand__copy">
         <strong>GPT-IMAGE 2 CLI</strong>
         <small>PROMPT → PIXELS / OPEN SOURCE</small>
@@ -151,18 +153,19 @@
       <div class="section-heading" data-reveal>
         <p><span>03</span> IMAGE GALLERY</p>
         <h2 id="examples-title">提示词先看得见，再拿去生成。</h2>
-        <p class="section-heading__lead">实际输出与示意图分开标注。点击任意提示词，可直接送进上面的命令实验台。</p>
+        <p class="section-heading__lead">所有示意图均清楚标注来源。点击任意提示词，可直接送进上面的命令实验台。</p>
       </div>
       <div class="gallery">
         <article class="gallery-item gallery-item--wide" data-reveal>
           <figure>
-            <img src="assets/examples/snow-observatory-generated.png" alt="雪山湖泊旁的未来观测站实际生成图片" width="1536" height="1024" loading="lazy">
-            <figcaption>ACTUAL CLI OUTPUT / 1536 × 1024</figcaption>
+            <img src="assets/examples/pixel-snow-observatory.png" alt="雪山湖畔未来观测站的霓虹像素风示意图" width="1536" height="1024" loading="lazy">
+            <figcaption>REPRODUCIBLE PIXEL PREVIEW / 1536 × 1024</figcaption>
           </figure>
           <div class="gallery-item__copy">
-            <span>实际生成输出</span>
+            <span>可复现像素示意图</span>
             <h3>雪山湖畔的未来观测站</h3>
-            <p>来自本项目 CLI 烟雾测试的实际落盘图片，用来展示横向大图、长等待与图片校验流程。</p>
+            <p>由仓库脚本确定性绘制，使用网站同款青色、洋红与荧光绿配色，展示横向像素场景的构图参考。</p>
+            <button type="button" data-use-prompt="雪山湖畔的未来观测站，圆顶天文台与指向星空的望远镜，霓虹青色、洋红和荧光绿，16-bit 像素艺术，复古街机氛围，无文字">使用这个提示词</button>
           </div>
         </article>
         <article class="gallery-item" data-reveal>
@@ -258,7 +261,7 @@
   </main>
 
   <footer class="site-footer">
-    <div><strong>GPT-IMAGE 2 CLI</strong><span>MIT LICENSE · MADE BY LIJINZH</span></div>
+    <div><strong>Made by Golden Philosophy</strong><span>© 2026 Golden Philosophy. All rights reserved. Open-source code licensed under MIT.</span></div>
     <nav aria-label="页脚导航"><a href="#quick-start">快速开始</a><a href="#examples">示例</a><a href="#safety">安全</a><button type="button" data-feedback-open>意见反馈</button><a href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">GitHub</a></nav>
   </footer>
 

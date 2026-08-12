@@ -271,81 +271,138 @@ def _render_great_wall_starfleet() -> Path:
 
 
 def _render_pixel_observatory() -> Path:
-    image = Image.new("RGB", (192, 128), "#050713")
+    width, height = 384, 256
+    image = Image.new("RGB", (width, height), "#050713")
     draw = ImageDraw.Draw(image)
 
     bands = (
-        (0, 24, "#050713"),
-        (24, 47, "#0b1535"),
-        (47, 66, "#24245b"),
-        (66, 79, "#7b326d"),
+        (0, 38, "#050713"),
+        (38, 78, "#091536"),
+        (78, 112, "#172452"),
+        (112, 139, "#493265"),
+        (139, 158, "#9d426f"),
     )
     for top, bottom, color in bands:
-        draw.rectangle((0, top, 191, bottom), fill=color)
+        draw.rectangle((0, top, width - 1, bottom), fill=color)
 
     rng = random.Random(2088)
-    for _ in range(118):
-        x = rng.randrange(2, 190)
-        y = rng.randrange(2, 66)
-        size = 2 if rng.random() < 0.08 else 1
+    for _ in range(310):
+        x = rng.randrange(3, width - 3)
+        y = rng.randrange(3, 135)
+        size = 2 if rng.random() < 0.12 else 1
         star_color = rng.choice(("#13f4ef", "#f7f4ff", "#ff3bd4"))
         draw.rectangle((x, y, x + size - 1, y + size - 1), fill=star_color)
 
-    draw.rectangle((139, 18, 158, 37), fill="#ff3bd4")
-    draw.rectangle((135, 22, 162, 33), fill="#ff3bd4")
-    draw.rectangle((143, 22, 154, 33), fill="#ff7ce5")
-    draw.rectangle((0, 79, 191, 127), fill="#091b35")
+    # Sunset planet and atmospheric glow on the right, matching the photo composition.
+    draw.ellipse((303, 48, 361, 106), fill="#ff3bd4")
+    draw.ellipse((310, 55, 354, 99), fill="#ff7694")
+    draw.rectangle((297, 78, 368, 84), fill="#111638")
+    draw.rectangle((316, 61, 349, 65), fill="#ffa26b")
 
+    # Layered mountains with snow shelves, rock seams, and distant atmospheric depth.
     rear_mountains = (
-        (0, 95), (38, 52), (66, 89), (101, 46), (130, 92),
-        (168, 58), (191, 82), (191, 127), (0, 127),
+        (0, 167), (52, 103), (82, 139), (128, 68), (190, 150),
+        (246, 101), (286, 146), (329, 116), (383, 157), (383, 205), (0, 205),
     )
     front_mountains = (
-        (0, 105), (46, 74), (75, 101), (109, 68), (143, 104),
-        (176, 76), (191, 91), (191, 127), (0, 127),
+        (0, 188), (63, 126), (106, 173), (150, 104), (211, 181),
+        (271, 132), (318, 178), (356, 145), (383, 174), (383, 218), (0, 218),
     )
-    snow_line = ((0, 104), (46, 74), (75, 101), (109, 68), (143, 104), (176, 76), (191, 91))
     draw.polygon(rear_mountains, fill="#102c4c")
-    draw.polygon(front_mountains, fill="#174167")
-    draw.line(snow_line, fill="#6f8eb3", width=2)
+    draw.polygon(front_mountains, fill="#183d61")
+    draw.polygon(((65, 126), (107, 173), (150, 104), (133, 147), (112, 158)), fill="#6f8eb3")
+    draw.polygon(((151, 104), (211, 181), (184, 160), (174, 139)), fill="#a6b8d4")
+    draw.polygon(((271, 132), (318, 178), (296, 161), (286, 145)), fill="#718caf")
+    draw.line(((0, 187), (63, 126), (106, 173), (150, 104), (211, 181)), fill="#d6e3f5", width=2)
+    draw.line(((211, 181), (271, 132), (318, 178), (356, 145), (383, 174)), fill="#91afd0", width=2)
+    for _ in range(75):
+        x = rng.randrange(6, 374)
+        y = rng.randrange(118, 196)
+        draw.line((x, y, x + rng.randrange(3, 11), y + rng.randrange(1, 5)), fill="#0c2747")
 
-    draw.rectangle((0, 111, 191, 127), fill="#071626")
-    draw.rectangle((0, 113, 191, 115), fill="#13f4ef")
-    draw.rectangle((0, 117, 191, 127), fill="#081022")
-    for x in range(0, 192, 16):
-        draw.line((96, 114, x, 127), fill="#263466")
-    for y in (119, 123):
-        draw.line((0, y, 191, y), fill="#263466")
+    # Lake with broken neon and planet reflections.
+    draw.rectangle((0, 183, 383, 255), fill="#071a31")
+    draw.rectangle((0, 188, 383, 193), fill="#154568")
+    for y in range(196, 253, 5):
+        for x in range(rng.randrange(-12, 1), 384, rng.randrange(15, 27)):
+            length = rng.randrange(4, 18)
+            color = rng.choice(("#0d3150", "#164d68", "#13f4ef", "#74406f"))
+            draw.line((x, y, min(383, x + length), y), fill=color)
+    for y, half_width in ((194, 30), (201, 26), (209, 21), (218, 17), (229, 12), (242, 8)):
+        draw.line((332 - half_width, y, 332 + half_width, y), fill="#ff6ca4", width=2)
 
-    # Observatory platform and modules.
-    draw.rectangle((47, 86, 148, 103), fill="#0b1028", outline="#13f4ef", width=2)
-    draw.rectangle((52, 80, 95, 99), fill="#111a3c", outline="#ff3bd4")
-    draw.rectangle((57, 85, 62, 91), fill="#b8ff4a")
-    draw.rectangle((68, 85, 74, 91), fill="#13f4ef")
-    draw.rectangle((80, 85, 88, 91), fill="#ff3bd4")
-    draw.rectangle((100, 77, 139, 100), fill="#101638", outline="#13f4ef")
-    draw.rectangle((105, 82, 112, 90), fill="#13f4ef")
-    draw.rectangle((119, 82, 126, 90), fill="#ff3bd4")
-    draw.rectangle((132, 82, 136, 91), fill="#b8ff4a")
+    # Multi-level observatory, echoing the real facility on the left foreground.
+    observatory_ground = ((0, 206), (58, 173), (170, 180), (218, 220), (218, 255), (0, 255))
+    draw.polygon(observatory_ground, fill="#081327")
+    draw.rectangle((18, 183, 170, 224), fill="#121a35", outline="#13f4ef", width=2)
+    draw.rectangle((10, 201, 179, 229), fill="#0b1028", outline="#263466", width=2)
+    draw.rectangle((26, 190, 74, 221), fill="#1c294b", outline="#536b9c")
+    draw.rectangle((80, 187, 126, 220), fill="#151f42", outline="#ff3bd4")
+    draw.rectangle((132, 192, 167, 221), fill="#18284a", outline="#13f4ef")
+    for x in (32, 45, 58, 86, 99, 112, 139, 151):
+        draw.rectangle((x, 201, x + 7, 211), fill=rng.choice(("#13f4ef", "#b8ff4a", "#ff3bd4")))
+        draw.rectangle((x + 1, 202, x + 5, 209), fill="#b9f8ff")
+    for x in range(20, 172, 12):
+        draw.rectangle((x, 218, x + 8, 220), fill="#536b9c")
+    draw.line((12, 198, 174, 198), fill="#f7f4ff")
+    for x in range(14, 176, 9):
+        draw.line((x, 194, x, 200), fill="#f7f4ff")
 
-    # Dome and telescope.
-    draw.rectangle((65, 69, 91, 84), fill="#18244e", outline="#13f4ef")
-    draw.rectangle((69, 64, 87, 69), fill="#283766", outline="#13f4ef")
-    draw.rectangle((73, 60, 83, 64), fill="#536b9c")
-    draw.rectangle((106, 64, 109, 78), fill="#f7f4ff")
-    draw.rectangle((109, 60, 123, 65), fill="#283766", outline="#ff3bd4")
-    draw.rectangle((121, 58, 127, 67), fill="#ff3bd4")
-    draw.line((124, 61, 145, 47), fill="#13f4ef", width=2)
-    draw.rectangle((144, 45, 148, 49), fill="#b8ff4a")
+    # Detailed telescope dome with segmented plating and slit lighting.
+    draw.ellipse((45, 137, 119, 198), fill="#1b294e", outline="#13f4ef", width=2)
+    draw.rectangle((44, 168, 120, 199), fill="#192542", outline="#13f4ef", width=2)
+    draw.arc((49, 141, 115, 196), 190, 350, fill="#91afd0", width=2)
+    draw.line((82, 139, 82, 169), fill="#f7f4ff", width=3)
+    draw.line((82, 144, 105, 154), fill="#536b9c", width=2)
+    for x in (56, 68, 94, 106):
+        draw.line((x, 157, x + 5, 193), fill="#263466")
 
-    # Small space operator in the foreground.
-    draw.rectangle((28, 88, 38, 100), fill="#f7f4ff", outline="#13f4ef")
-    draw.rectangle((30, 84, 36, 89), fill="#f7f4ff")
-    draw.rectangle((31, 85, 35, 87), fill="#ff3bd4")
-    draw.rectangle((26, 91, 29, 98), fill="#b8ff4a")
-    draw.rectangle((37, 91, 40, 98), fill="#13f4ef")
-    draw.rectangle((29, 100, 32, 106), fill="#f7f4ff")
-    draw.rectangle((35, 100, 38, 106), fill="#f7f4ff")
+    # Landing pad, service bridge, antennae, cables, and small props.
+    draw.ellipse((183, 210, 297, 254), fill="#10182e", outline="#ff3bd4", width=2)
+    draw.ellipse((195, 217, 285, 248), outline="#536b9c", width=2)
+    draw.ellipse((215, 224, 265, 242), outline="#13f4ef", width=2)
+    draw.line((168, 218, 204, 228), fill="#f7f4ff", width=3)
+    draw.line((168, 224, 201, 234), fill="#263466", width=2)
+    draw.line((139, 190, 139, 135), fill="#f7f4ff", width=2)
+    draw.line((139, 139, 159, 124), fill="#13f4ef", width=2)
+    draw.rectangle((157, 121, 165, 128), fill="#b8ff4a")
+    draw.line((139, 151, 179, 145), fill="#ff3bd4")
+    for x in (7, 178, 302):
+        draw.rectangle((x, 218, x + 4, 226), fill="#ffb45e")
+
+    # A richer 32-bit-style field operator: backpack, articulated suit, visor, gear and pose.
+    draw.rectangle((309, 177, 331, 196), fill="#dce8f5", outline="#050713", width=2)
+    draw.rectangle((312, 180, 328, 191), fill="#132546")
+    draw.rectangle((314, 182, 326, 187), fill="#13f4ef")
+    draw.rectangle((316, 184, 324, 188), fill="#b8ff4a")
+    draw.rectangle((306, 181, 311, 194), fill="#ff3bd4")
+    draw.rectangle((330, 184, 334, 193), fill="#536b9c")
+    draw.rectangle((308, 196, 332, 222), fill="#d7e3ef", outline="#050713", width=2)
+    draw.rectangle((313, 199, 328, 213), fill="#24385b")
+    draw.rectangle((316, 202, 325, 206), fill="#ff3bd4")
+    draw.rectangle((316, 208, 321, 212), fill="#13f4ef")
+    draw.rectangle((304, 199, 310, 216), fill="#9eb1c8", outline="#050713")
+    draw.rectangle((330, 198, 336, 218), fill="#9eb1c8", outline="#050713")
+    draw.rectangle((302, 214, 309, 221), fill="#b8ff4a", outline="#050713")
+    draw.rectangle((332, 216, 339, 223), fill="#13f4ef", outline="#050713")
+    draw.rectangle((310, 221, 319, 241), fill="#bdcadb", outline="#050713", width=2)
+    draw.rectangle((323, 221, 332, 241), fill="#bdcadb", outline="#050713", width=2)
+    draw.rectangle((306, 238, 319, 245), fill="#ff3bd4", outline="#050713")
+    draw.rectangle((323, 238, 337, 245), fill="#13f4ef", outline="#050713")
+    draw.line((334, 205, 353, 192), fill="#f7f4ff", width=2)
+    draw.rectangle((351, 188, 357, 195), fill="#ffb45e", outline="#050713")
+
+    # Foreground snow and rock texture add depth around the character and pad.
+    foreground = (
+        (0, 228), (76, 216), (142, 232), (202, 227),
+        (267, 246), (384, 236), (384, 256), (0, 256),
+    )
+    draw.polygon(foreground, fill="#10182a")
+    for _ in range(110):
+        x = rng.randrange(0, 384)
+        y = rng.randrange(226, 256)
+        color = rng.choice(("#223553", "#526c8d", "#d6e3f5", "#13f4ef"))
+        draw.rectangle((x, y, x + rng.randrange(1, 5), y + 1), fill=color)
 
     OBSERVATORY_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     image.resize((1536, 1024), Image.Resampling.NEAREST).save(

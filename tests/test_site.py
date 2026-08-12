@@ -38,7 +38,8 @@ def test_site_has_required_public_content() -> None:
     content = " ".join(parser.text)
     assert "复制一句话，交给 Codex" in content
     assert "四步进入生成循环" in content
-    assert "可复现像素示意图" in content
+    assert "写实生成图 × 32-bit 像素场景" in content
+    assert "点击图片或箭头切换" in content
     assert "Made by Golden Philosophy" in content
     assert "© 2026 Golden Philosophy. All rights reserved." in content
     assert "API KEY SAFETY" in content
@@ -71,12 +72,17 @@ def test_site_javascript_and_css_are_wired() -> None:
     assert 'href="styles.css"' in html
     assert 'href="assets/icons/pixel-space-operator.svg"' in html
     assert 'src="assets/icons/pixel-space-operator.png"' in html
+    assert 'src="assets/examples/observatory-photorealistic.png"' in html
     assert 'src="assets/examples/pixel-snow-observatory.png"' in html
     assert ">GI<" not in html
     assert "data-copy-target" in javascript
     assert "website-feedback" in javascript
     assert "issues/new" in javascript
     assert "showModal" in javascript
+    assert "data-observatory-carousel" in html
+    assert "data-carousel-next" in html
+    assert "pointerdown" in javascript
+    assert "setInterval" in javascript
     assert "prefers-reduced-motion" in stylesheet
     assert (DOCS / ".nojekyll").is_file()
 

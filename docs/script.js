@@ -152,6 +152,85 @@ document.querySelectorAll('[data-use-prompt]').forEach((button) => {
 });
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+document.querySelectorAll('[data-observatory-carousel]').forEach((carousel) => {
+  const viewport = carousel.querySelector('[data-carousel-viewport]');
+  const track = carousel.querySelector('[data-carousel-track]');
+  const slides = [...carousel.querySelectorAll('[data-carousel-slide]')];
+  const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
+  const label = carousel.querySelector('[data-carousel-label]');
+  const count = carousel.querySelector('[data-carousel-count]');
+  const labels = ['写实版本', '32-bit 像素版本'];
+  let currentIndex = 0;
+  let autoTimer;
+  let pointerStart = null;
+
+  function showSlide(index, userInitiated = false) {
+    currentIndex = (index + slides.length) % slides.length;
+    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    slides.forEach((slide, slideIndex) => {
+      const active = slideIndex === currentIndex;
+      slide.classList.toggle('is-active', active);
+      slide.setAttribute('aria-hidden', String(!active));
+    });
+    dots.forEach((dot, dotIndex) => {
+      const active = dotIndex === currentIndex;
+      dot.classList.toggle('is-active', active);
+      dot.setAttribute('aria-current', String(active));
+    });
+    label.textContent = labels[currentIndex];
+    count.textContent = `${String(currentIndex + 1).padStart(2, '0')} / 02`;
+    if (userInitiated) restartAutoPlay();
+  }
+
+  function restartAutoPlay() {
+    window.clearInterval(autoTimer);
+    if (!reducedMotion) {
+      autoTimer = window.setInterval(() => showSlide(currentIndex + 1), 5200);
+    }
+  }
+
+  carousel.querySelector('[data-carousel-previous]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    showSlide(currentIndex - 1, true);
+  });
+  carousel.querySelector('[data-carousel-next]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    showSlide(currentIndex + 1, true);
+  });
+  dots.forEach((dot, index) => dot.addEventListener('click', (event) => {
+    event.stopPropagation();
+    showSlide(index, true);
+  }));
+
+  viewport?.addEventListener('click', (event) => {
+    if (event.target.closest('button')) return;
+    showSlide(currentIndex + 1, true);
+  });
+  viewport?.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowRight') showSlide(currentIndex + 1, true);
+    if (event.key === 'ArrowLeft') showSlide(currentIndex - 1, true);
+  });
+  viewport?.addEventListener('pointerdown', (event) => {
+    pointerStart = event.clientX;
+  });
+  viewport?.addEventListener('pointerup', (event) => {
+    if (pointerStart === null) return;
+    const distance = event.clientX - pointerStart;
+    pointerStart = null;
+    if (Math.abs(distance) < 46) return;
+    showSlide(currentIndex + (distance < 0 ? 1 : -1), true);
+  });
+  viewport?.addEventListener('pointercancel', () => { pointerStart = null; });
+  carousel.addEventListener('mouseenter', () => window.clearInterval(autoTimer));
+  carousel.addEventListener('mouseleave', restartAutoPlay);
+  carousel.addEventListener('focusin', () => window.clearInterval(autoTimer));
+  carousel.addEventListener('focusout', restartAutoPlay);
+
+  showSlide(0);
+  restartAutoPlay();
+});
+
 if ('IntersectionObserver' in window && !reducedMotion) {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {

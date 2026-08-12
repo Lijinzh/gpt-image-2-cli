@@ -31,6 +31,8 @@ def test_client_rejects_non_positive_limits() -> None:
     )
     with pytest.raises(GenerationError, match="greater than zero"):
         ImageClient(config, max_response_mb=0)
+    with pytest.raises(GenerationError, match="cannot be negative"):
+        ImageClient(config, connect_retries=-1)
 
 
 def test_client_handles_openai_compatible_base64_response() -> None:
@@ -82,3 +84,57 @@ def test_client_handles_openai_compatible_base64_response() -> None:
     assert result.images[0].data == png
     assert state["payload"]["size"] == "1536x1024"
     assert "response_format" not in state["payload"]
+
+
+def test_client_accepts_an_explicit_proxy_configuration() -> None:
+    config = ApiConfig(
+        provider="test",
+        api_base="https://relay.example/v1",
+        api_key="test-key",
+        source="test",
+    )
+    client = ImageClient(
+        config,
+        trust_env=False,
+        proxy="http://127.0.0.1:7890",
+    )
+    assert client.proxy == "http://127.0.0.1:7890"
+    assert client.trust_env is False
+
+
+def test_client_rejects_error_object_wrapped_in_http_200() -> None:
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, *_args: Any) -> None:
+            return
+
+        def do_POST(self) -> None:  # noqa: N802
+            length = int(self.headers["Content-Length"])
+            self.rfile.read(length)
+            body = json.dumps(
+                {"error": {"message": "request was blocked", "code": "blocked"}}
+            ).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        config = ApiConfig(
+            provider="test",
+            api_base=f"http://127.0.0.1:{server.server_port}/v1",
+            api_key="test-key",
+            source="test",
+        )
+        with pytest.raises(GenerationError, match="request was blocked"):
+            ImageClient(config, trust_env=False).generate(
+                GenerationOptions(model="gpt-image-2", prompt="test"),
+                show_progress=False,
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)

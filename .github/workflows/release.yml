@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to publish
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    env:
+      GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+      GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+
+      - name: Resolve and validate tag
+        id: release
+        shell: bash
+        env:
+          DISPATCH_TAG: ${{ inputs.tag }}
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="${DISPATCH_TAG}"
+          fi
+          version="$(uv run --no-project python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+          test "${tag}" = "v${version}"
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Test and build wheel
+        run: |
+          uv sync --frozen
+          uv run --frozen pytest
+          uv run --frozen ruff check .
+          uv build
+          wheel="$(find dist -maxdepth 1 -name '*.whl' -print -quit)"
+          uv run --no-project python scripts/build_release_manifest.py "${wheel}"
+
+      - name: Publish GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          gh release view "${TAG}" >/dev/null 2>&1 || gh release create "${TAG}" --title "GPT-Image 2 CLI ${TAG#v}" --generate-notes
+          gh release upload "${TAG}" dist/*.whl dist/latest.json --clobber
+
+      - name: Mirror release assets to Gitee
+        if: ${{ env.GITEE_TOKEN != '' }}
+        env:
+          GITEE_OWNER: ${{ vars.GITEE_OWNER || 'shan-yujun' }}
+          GITEE_REPO: ${{ vars.GITEE_REPO || 'gpt-image-2-cli' }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run --no-project python scripts/sync_release_mirrors.py gitee
+
+      - name: Mirror release assets to GitCode
+        if: ${{ env.GITCODE_TOKEN != '' }}
+        env:
+          GITCODE_OWNER: ${{ vars.GITCODE_OWNER || 'Lijinzh' }}
+          GITCODE_REPO: ${{ vars.GITCODE_REPO || 'gpt-image-2-cli' }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run --no-project python scripts/sync_release_mirrors.py gitcode
+
+      - name: Verify public update channels
+        env:
+          GITEE_ENABLED: ${{ env.GITEE_TOKEN != '' }}
+          GITCODE_ENABLED: ${{ env.GITCODE_TOKEN != '' }}
+        run: |
+          uv run --no-project python scripts/verify_release_channels.py github
+          if [[ "${GITEE_ENABLED}" == "true" ]]; then uv run --no-project python scripts/verify_release_channels.py gitee; fi
+          if [[ "${GITCODE_ENABLED}" == "true" ]]; then uv run --no-project python scripts/verify_release_channels.py gitcode; fi

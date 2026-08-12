@@ -16,6 +16,22 @@ uv run ruff check .
 uv build
 ```
 
+## 发布
+
+发布前必须让 `pyproject.toml` 与 `src/gpt_image_cli/__init__.py` 的版本一致，然后创建同名
+标签（例如版本 `0.2.0` 对应标签 `v0.2.0`）。GitHub Actions 会构建 wheel 和
+`latest.json`，发布 GitHub Release，并在配置了仓库 Secret 时同步 Gitee/GitCode。
+
+本地可预览更新清单：
+
+```powershell
+uv build
+$wheel = Get-ChildItem .\dist\*.whl | Select-Object -First 1
+uv run --no-project python .\scripts\build_release_manifest.py $wheel.FullName
+```
+
+不要手工修改 `latest.json` 的大小或摘要，也不要发布相同版本但不同内容的 wheel。
+
 提交前请确认：
 
 - 新行为有对应测试。

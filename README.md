@@ -76,7 +76,7 @@ gpt-image generate "Star Wars 宇宙中的 16-bit 像素艺术场景：Luke Skyw
 管理，并安全替换整个隔离环境：
 
 ```powershell
-uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.1/gpt_image_2_cli-0.2.1-py3-none-any.whl"
+uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.2/gpt_image_2_cli-0.2.2-py3-none-any.whl"
 gpt-image --version
 ```
 
@@ -91,13 +91,14 @@ uv tool install "git+https://github.com/Lijinzh/gpt-image-2-cli.git"
 ## 自动更新
 
 CLI 会在交互式运行 `doctor` 或 `generate` 成功后，最多每 24 小时检查一次正式 Release。
-检查超时很短、失败时保持安静，也不会自动修改安装；只有发现更新时才显示类似提示：
+发现更新时，它会下载并完成全部安全校验，然后在当前命令退出后自动更新隔离环境，避免运行
+过程中替换自己。下一次调用会直接使用新版，并显示类似提示：
 
 ```text
-Update available: gpt-image 0.2.0 -> 0.3.0 (gitee). Run `gpt-image update` to install it.
+Verified gpt-image 0.3.0 from gitee; it will install automatically after this command exits.
 ```
 
-脚本或 CI 使用 `--json` 时不会插入提醒。如需完全关闭低频检查，可设置
+脚本或 CI 使用 `--json` 时不会触发自动更新。如需完全关闭低频检查和自动更新，可设置
 `GPT_IMAGE_DISABLE_UPDATE_CHECK=1`；仍然可以随时手动运行 `gpt-image update --check`。
 
 只检查版本，不修改安装：
@@ -107,7 +108,7 @@ gpt-image update --check
 gpt-image update --check --json
 ```
 
-检查并安装最新正式版：
+检查、下载并安排在命令退出后安装最新正式版：
 
 ```powershell
 gpt-image update

@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050713">
+  <meta name="description" content="GPT-Image 2 CLI: a reliable text-to-image command-line tool for CC-Switch and OpenAI-compatible relays.">
+  <meta property="og:title" content="GPT-Image 2 CLI · Turn prompts into pixels">
+  <meta property="og:description" content="Install, configure, preview, and generate. Bring a safer GPT-Image workflow to your terminal.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://lijinzh.github.io/gpt-image-2-cli/en/">
+  <meta property="og:image" content="https://lijinzh.github.io/gpt-image-2-cli/assets/examples/star-wars-twin-sunset.png">
+  <title>GPT-Image 2 CLI · English</title>
+  <link rel="canonical" href="https://lijinzh.github.io/gpt-image-2-cli/en/">
+  <link rel="alternate" hreflang="zh-CN" href="https://lijinzh.github.io/gpt-image-2-cli/">
+  <link rel="alternate" hreflang="en" href="https://lijinzh.github.io/gpt-image-2-cli/en/">
+  <link rel="alternate" hreflang="x-default" href="https://lijinzh.github.io/gpt-image-2-cli/">
+  <link rel="icon" href="../assets/icons/pixel-space-operator.svg" type="image/svg+xml">
+  <link rel="icon" href="../assets/icons/pixel-space-operator.png" type="image/png">
+  <link rel="apple-touch-icon" href="../assets/icons/pixel-space-operator.png">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../script.js" defer></script>
+</head>
+<body data-visual-theme="cosmic">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <div class="signal-strip" aria-hidden="true">
+    <span>GPT-IMAGE 2 CLI // PROMPT → PIXELS // SAFE CONFIG // OPEN SOURCE //</span>
+    <span>GPT-IMAGE 2 CLI // PROMPT → PIXELS // SAFE CONFIG // OPEN SOURCE //</span>
+  </div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="GPT-Image 2 CLI home">
+      <span class="brand__mark" aria-hidden="true"><img src="../assets/icons/pixel-space-operator.png" alt="" width="48" height="48"></span>
+      <span class="brand__copy">
+        <strong>GPT-IMAGE 2 CLI</strong>
+        <small>PROMPT → PIXELS / OPEN SOURCE</small>
+      </span>
+    </a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav" data-menu-button>MENU</button>
+    <nav class="site-nav" id="site-nav" aria-label="Main navigation" data-site-nav>
+      <a href="#quick-start">Quick start</a>
+      <a href="#examples">Gallery</a>
+      <a href="#reliability">Reliability</a>
+      <a href="#safety">Safety</a>
+      <a href="#feedback">Feedback</a>
+    </nav>
+    <nav class="language-switch" aria-label="Language selector">
+      <a href="../?lang=zh" lang="zh-CN" hreflang="zh-CN">中文</a>
+      <a class="is-active" href="./?lang=en" lang="en" hreflang="en" aria-current="page">EN</a>
+    </nav>
+    <a class="header-github" href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">
+      <span>LIJINZH / GITHUB</span>
+      <strong>View source</strong>
+    </a>
+  </header>
+
+  <main id="main-content">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero__stars" aria-hidden="true"></div>
+      <div class="hero__copy" data-reveal>
+        <h1 id="hero-title">TURN PROMPTS<br><em>INTO PIXELS.</em></h1>
+        <p>A reliable, auditable GPT-Image command-line tool that avoids surprise repeat charges. Use it with CC-Switch or any OpenAI-compatible relay.</p>
+        <div class="hero__actions">
+          <button class="pixel-button pixel-button--lime" type="button" data-copy-target="codex-command">Configure with Codex</button>
+          <a class="pixel-button pixel-button--cyan" href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+        </div>
+        <div class="terminal-window" aria-label="Image-generation command demo">
+          <div class="terminal-window__bar"><span>GENERATOR.EXE</span><i></i><i></i><i></i></div>
+          <pre><code><span class="terminal-green">&gt; gpt-image generate</span>
+"an 8-bit city on a neon rainy night"
+<span class="terminal-cyan">--size landscape --quality high</span>
+<span class="terminal-pink">✓ IMAGE VALIDATED / SAVED</span></code></pre>
+        </div>
+      </div>
+
+      <div class="hero__scene" aria-hidden="true" data-reveal>
+        <div class="operator-orbit">
+          <span class="operator-orbit__ring operator-orbit__ring--outer"></span>
+          <span class="operator-orbit__ring operator-orbit__ring--inner"></span>
+          <span class="operator-orbit__node operator-orbit__node--one"></span>
+          <span class="operator-orbit__node operator-orbit__node--two"></span>
+          <span class="operator-orbit__node operator-orbit__node--three"></span>
+          <div class="operator-orbit__core">
+            <img src="../assets/icons/pixel-space-operator.png" alt="" width="256" height="256">
+          </div>
+          <div class="operator-orbit__caption"><span>IMAGE OPERATOR</span><strong>READY / 02</strong></div>
+        </div>
+        <div class="scene-status"><span>RELAY</span><strong>ONLINE</strong><span>MODEL</span><strong>GPT-IMAGE-2</strong></div>
+      </div>
+
+      <div class="theme-switcher" role="group" aria-label="Switch homepage visual theme" data-theme-switcher>
+        <span>SCENE</span>
+        <button class="is-active" type="button" data-theme="cosmic" aria-pressed="true">Twin dusk</button>
+        <button type="button" data-theme="silence" aria-pressed="false">Silent hall</button>
+        <button type="button" data-theme="occult" aria-pressed="false">Black-gold nave</button>
+      </div>
+    </section>
+
+    <section class="codex-setup" aria-labelledby="codex-title">
+      <div class="section-heading" data-reveal>
+        <p><span>01</span> ONE-LINE SETUP</p>
+        <h2 id="codex-title">Install once. Generate with confidence.</h2>
+      </div>
+      <div class="copy-deck" data-reveal>
+        <code id="codex-command">Install and configure gpt-image-2-cli from https://github.com/Lijinzh/gpt-image-2-cli. Prefer my current local CC-Switch Codex provider. First run gpt-image doctor and one no-charge --dry-run. Never print, copy, or save an API key. If CC-Switch is unavailable, guide me to set GPT_IMAGE_API_BASE and GPT_IMAGE_API_KEY locally, and do not ask me to paste a key into chat. After verification, tell me where the CLI was installed and give me one command that can generate an image.</code>
+        <button class="pixel-button pixel-button--lime" type="button" data-copy-target="codex-command">COPY COMMAND</button>
+      </div>
+      <p class="privacy-note" data-reveal><img src="../assets/icons/pixel-shield.svg" alt="" width="30" height="30">Only this setup prompt is copied. Your real API key always stays on your own computer.</p>
+    </section>
+
+    <section class="quick-start" id="quick-start" aria-labelledby="quick-start-title">
+      <div class="section-heading" data-reveal>
+        <p><span>02</span> QUICK START</p>
+        <h2 id="quick-start-title">Four steps from install to image</h2>
+      </div>
+      <ol class="step-rail">
+        <li class="step step--cyan" data-reveal>
+          <span>01</span><strong>INSTALL</strong><p>Install the CLI from GitHub with uv.</p>
+          <code id="install-command">uv tool install "git+https://github.com/Lijinzh/gpt-image-2-cli.git"</code>
+          <button type="button" data-copy-target="install-command">Copy install command</button>
+        </li>
+        <li class="step step--pink" data-reveal>
+          <span>02</span><strong>DOCTOR</strong><p>Inspect the provider, model, and network configuration without modifying it.</p>
+          <code>gpt-image doctor</code>
+        </li>
+        <li class="step step--orange" data-reveal>
+          <span>03</span><strong>DRY RUN</strong><p>Preview the request first, without generating an image or incurring model charges.</p>
+          <code>gpt-image generate "..." --dry-run</code>
+        </li>
+        <li class="step step--lime" data-reveal>
+          <span>04</span><strong>GENERATE</strong><p>Generate after reviewing the request, then validate the format and actual pixel dimensions.</p>
+          <code>gpt-image generate "..." -o result.png</code>
+        </li>
+      </ol>
+    </section>
+
+    <section class="command-lab" aria-labelledby="command-lab-title">
+      <div class="command-lab__copy" data-reveal>
+        <div class="section-heading">
+          <p><span>PLAY</span> COMMAND LAB</p>
+          <h2 id="command-lab-title">Build the command before you copy it.</h2>
+        </div>
+        <p>Choose a prompt, aspect ratio, and quality. The page generates a ready-to-run command in real time without connecting to an API or reading any credential.</p>
+      </div>
+      <form class="command-builder" data-command-builder data-reveal>
+        <label for="prompt-input">Prompt</label>
+        <textarea id="prompt-input" rows="4" data-prompt>A pixel-art mecha courier on a neon street at night, 16-bit RPG scene, blue and violet palette, no text</textarea>
+        <div class="command-builder__options">
+          <label>Aspect ratio
+            <select data-size>
+              <option value="landscape">Landscape</option>
+              <option value="square">Square</option>
+              <option value="portrait">Portrait</option>
+            </select>
+          </label>
+          <label>Quality
+            <select data-quality>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </label>
+        </div>
+        <div class="generated-command"><code id="generated-command" data-command-output></code></div>
+        <button class="pixel-button pixel-button--cyan" type="button" data-copy-target="generated-command">Copy generated command</button>
+      </form>
+    </section>
+
+    <section class="examples" id="examples" aria-labelledby="examples-title">
+      <div class="section-heading" data-reveal>
+        <p><span>03</span> IMAGE GALLERY</p>
+        <h2 id="examples-title">Eight films. Eight pixel-art stories.</h2>
+        <p class="section-heading__lead">Browse with the large arrow buttons, keyboard arrow keys, or a touch swipe. Every image includes its full test prompt, ready to send to the command lab.</p>
+      </div>
+      <div class="cinema-gallery" data-gallery-carousel data-reveal aria-roledescription="carousel" aria-label="High-detail pixel-art cinema gallery">
+        <div class="cinema-gallery__stage" data-gallery-viewport tabindex="0">
+          <div class="cinema-gallery__track" data-gallery-track>
+            <figure class="cinema-gallery__slide is-active" data-gallery-slide data-title="Twin Sunset · Space Opera" data-kicker="SPACE OPERA / SCENE 01" data-description="Twin suns, layered dunes, an original survey rover, and a distant spacecraft test atmospheric depth, rim-lit silhouettes, and weathered machinery." data-prompt="An original retro space-opera landscape on a vast alien desert ridge beneath two setting suns, with a rugged six-wheeled survey rover, tall communications mast and tiny cargo spacecraft far away. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, layered dunes and atmospheric perspective, cinematic orange-violet rim light, realistic weathered metal and sand textures, crisp silhouettes, wide establishing shot, no text, no logo, no watermark, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original vehicle designs." aria-hidden="false">
+              <img src="../assets/examples/star-wars-twin-sunset.png" alt="High-detail pixel-art scene of an alien desert beneath two setting suns" width="1536" height="1024">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="Lunar Monolith · 2001-Inspired" data-kicker="SCI-FI MINIMALISM / SCENE 02" data-description="A restrained black, white, and cobalt palette with a symmetrical lunar composition tests hard shadows, geometric order, spacesuits, and technical equipment." data-prompt="A silent lunar excavation site where two astronauts in retro-futurist white suits stand before a perfectly black rectangular monolith, Earth low above the horizon, geometric floodlights casting long hard shadows across detailed regolith and machinery. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, disciplined symmetrical widescreen composition, restrained white charcoal black and cobalt palette, physically convincing suit joints and equipment, cinematic depth, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting." aria-hidden="true">
+              <img src="../assets/examples/space-odyssey-monolith.png" alt="High-detail pixel-art astronauts facing a black monolith on the Moon" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="Duel at the Gates · Troy-Inspired" data-kicker="BRONZE AGE EPIC / SCENE 03" data-description="Bronze Age warriors, colossal city gates, and receding formations test historical costume, crowd readability, dust, and stone texture." data-prompt="Two legendary Bronze Age warriors facing each other outside colossal ancient city gates, one carrying a round shield and tall-crested helmet, spear formations and soldiers receding into dusty depth, towering stone walls and banners under a blood-orange sunset. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, archaeologically grounded bronze armor, leather and woven cloth, dramatic dust and backlight, epic widescreen composition, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting." aria-hidden="true">
+              <img src="../assets/examples/troy-gates-duel.png" alt="High-detail pixel-art duel between Bronze Age warriors outside ancient gates" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="Rain Above the City · Spider-Hero-Inspired" data-kicker="URBAN RESCUE NOIR / SCENE 04" data-description="Rain, lightning, thousands of windows, a maintenance drone, and a high-altitude worker test wet reflections and a high-contrast urban night." data-prompt="An original futuristic high-altitude rescue operation above a rain-soaked megacity: a compact yellow maintenance drone stretches a luminous safety cable between two rooftops while a helmeted utility worker in teal weather gear secures an antenna platform, lightning revealing dense skyscrapers, traffic and thousands of windows. Extreme horizontal widescreen establishing composition with the small worker in the left third and a broad city panorama filling the frame. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, dynamic low three-quarter camera, believable industrial equipment, wet reflections, deep navy teal and electric-yellow palette, cinematic rain and rim light, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original designs." aria-hidden="true">
+              <img src="../assets/examples/spider-hero-rooftop.png" alt="High-detail pixel-art high-altitude rescue above a rainy megacity" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="Armor Workshop · Iron-Hero-Inspired" data-kicker="ARMORED TECHNOLOGY / SCENE 05" data-description="An original exosuit, robotic arms, display bays, and holographic interfaces test metallic highlights, a luminous core, and dense mechanical structure." data-prompt="Inside a luminous underground technology workshop, an original copper-and-crimson exosuit engineer stands at the center while multi-axis robotic arms calibrate a hexagonal torso power cell, illuminated display bays holding industrial suit modules and abstract cyan holographic diagrams. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, dense readable machinery, realistic brushed metal and reflections, warm amber versus cool blue lighting, cinematic widescreen depth, no readable text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original armor design." aria-hidden="true">
+              <img src="../assets/examples/iron-hero-workshop.png" alt="High-detail pixel-art exosuit engineer inside a robotic workshop" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="City Assembly · Avengers-Inspired" data-kicker="ENSEMBLE BATTLE / SCENE 06" data-description="Six original rescue champions assemble in a damaged avenue to test ensemble readability, explosions, aircraft, debris, and layered urban space." data-prompt="Six entirely original emergency-response champions forming a defensive circle in a shattered metropolitan avenue: a jetpack engineer, kinetic-shield guardian, weather channeler, massive stone rescue specialist, agile scout and precision archer, while unknown aircraft weave between towers and explosions throw debris and sparks through the street. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, readable ensemble silhouettes, layered urban destruction, bold comic palette with cinematic volumetric light, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original costumes and insignia." aria-hidden="true">
+              <img src="../assets/examples/avengers-city-battle.png" alt="High-detail pixel-art team of original heroes defending a damaged city" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="Underground Corridor · Silence-Inspired" data-kicker="PSYCHOLOGICAL THRILLER / SCENE 07" data-description="One-point perspective, cold fluorescent light, and a reinforced glass room create pressure while testing interior depth and restrained emotion." data-prompt="An original forensic interviewer at the end of a cold underground detention corridor facing an anonymous high-security detainee behind reinforced glass, guards and barred cells fading into darkness on both sides. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, strict one-point perspective and oppressive symmetry, realistic tiled walls, glass reflections and restrained expressions, fluorescent green-gray light with tiny dark-red accents, psychological tension without gore, no text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original characters." aria-hidden="true">
+              <img src="../assets/examples/silence-prison-corridor.png" alt="High-detail pixel-art interviewer facing a detainee behind reinforced glass" width="1536" height="1024" loading="lazy">
+            </figure>
+            <figure class="cinema-gallery__slide" data-gallery-slide data-title="Cathedral in the Rain · Constantine-Inspired" data-kicker="OCCULT NOIR / SCENE 08" data-description="Gothic vaults, stained-glass beams, wet reflections, and supernatural smoke test shadow detail and colored light in an occult-noir setting." data-prompt="An original weary paranormal archivist in a charcoal raincoat standing in a rain-lashed Gothic cathedral aisle, holding a small flame while supernatural smoke coils beneath ribbed vaults, stained glass casting gold and crimson shafts across reflective wet stone. Premium high-density 1990s arcade pixel art, extreme horizontal widescreen composition showing the full nave from left transept to right transept, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, intricate carved architecture, believable coat and skin texture, dramatic chiaroscuro, amber teal and deep-red palette, cinematic noir depth, no readable text, no logo, no watermark, no actor likeness, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original character design." aria-hidden="true">
+              <img src="../assets/examples/constantine-cathedral.png" alt="High-detail pixel-art paranormal archivist inside a rain-soaked cathedral" width="1536" height="1024" loading="lazy">
+            </figure>
+          </div>
+
+          <button class="cinema-gallery__arrow cinema-gallery__arrow--previous" type="button" data-gallery-previous aria-label="View previous cinema scene">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 9 15 24l15 15M16 24h23"/></svg>
+          </button>
+          <button class="cinema-gallery__arrow cinema-gallery__arrow--next" type="button" data-gallery-next aria-label="View next cinema scene">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path d="m18 9 15 15-15 15M32 24H9"/></svg>
+          </button>
+          <div class="cinema-gallery__status" aria-live="polite" aria-atomic="true">
+            <span data-gallery-status-title>Twin Sunset · Space Opera</span>
+            <strong data-gallery-count>01 / 08</strong>
+          </div>
+          <p class="cinema-gallery__hint">← → arrow keys · swipe left or right</p>
+        </div>
+
+        <div class="cinema-gallery__details">
+          <div class="cinema-gallery__copy" aria-live="polite" aria-atomic="true">
+            <span data-gallery-kicker>SPACE OPERA / SCENE 01</span>
+            <h3 data-gallery-title>Twin Sunset · Space Opera</h3>
+            <p data-gallery-description>Twin suns, layered dunes, an original survey rover, and a distant spacecraft test atmospheric depth, rim-lit silhouettes, and weathered machinery.</p>
+          </div>
+          <div class="cinema-gallery__prompt">
+            <div><span>PROMPT.TXT</span><button type="button" data-gallery-copy>Copy prompt</button></div>
+            <code data-gallery-prompt>An original retro space-opera landscape on a vast alien desert ridge beneath two setting suns, with a rugged six-wheeled survey rover, tall communications mast and tiny cargo spacecraft far away. Premium high-density 1990s arcade pixel art, 32-bit Neo Geo-era visual richness, hand-authored pixel clusters, layered dunes and atmospheric perspective, cinematic orange-violet rim light, realistic weathered metal and sand textures, crisp silhouettes, wide establishing shot, no text, no logo, no watermark, not a film screenshot, not vector art, not minimalist, no smooth digital painting, entirely original vehicle designs.</code>
+          </div>
+          <button class="pixel-button pixel-button--lime cinema-gallery__use" type="button" data-gallery-use>Send to command lab</button>
+          <p class="cinema-gallery__legal">Unofficial pixel-art homage examples with no official logos, film screenshots, or actor likenesses. All eight large images were generated through this repository's CLI using gpt-image-2.</p>
+        </div>
+
+        <div class="cinema-gallery__thumbs" data-gallery-thumbs aria-label="Choose a cinema scene">
+          <button class="is-active" type="button" data-gallery-thumb="0" aria-current="true"><img src="../assets/examples/star-wars-twin-sunset.png" alt=""><span>Star Wars</span></button>
+          <button type="button" data-gallery-thumb="1" aria-current="false"><img src="../assets/examples/space-odyssey-monolith.png" alt=""><span>Space Odyssey</span></button>
+          <button type="button" data-gallery-thumb="2" aria-current="false"><img src="../assets/examples/troy-gates-duel.png" alt=""><span>Troy</span></button>
+          <button type="button" data-gallery-thumb="3" aria-current="false"><img src="../assets/examples/spider-hero-rooftop.png" alt=""><span>Spider-Hero</span></button>
+          <button type="button" data-gallery-thumb="4" aria-current="false"><img src="../assets/examples/iron-hero-workshop.png" alt=""><span>Iron-Hero</span></button>
+          <button type="button" data-gallery-thumb="5" aria-current="false"><img src="../assets/examples/avengers-city-battle.png" alt=""><span>Avengers</span></button>
+          <button type="button" data-gallery-thumb="6" aria-current="false"><img src="../assets/examples/silence-prison-corridor.png" alt=""><span>Silence</span></button>
+          <button type="button" data-gallery-thumb="7" aria-current="false"><img src="../assets/examples/constantine-cathedral.png" alt=""><span>Constantine</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="reliability" id="reliability" aria-labelledby="reliability-title">
+      <div class="section-heading" data-reveal>
+        <p><span>04</span> BUILT FOR THE LONG RUN</p>
+        <h2 id="reliability-title">Large images can take time. Your result should still arrive safely.</h2>
+      </div>
+      <div class="reliability__grid">
+        <dl class="metrics" data-reveal>
+          <div><dt>30 MIN</dt><dd>A generous default request window for large images, with visible heartbeat output.</dd></div>
+          <div><dt>NO RETRY</dt><dd>No automatic resubmission after read timeouts or dropped connections, reducing duplicate-charge risk.</dd></div>
+          <div><dt>ATOMIC SAVE</dt><dd>Validate the image first, then write it atomically to the destination.</dd></div>
+        </dl>
+        <div class="response-check" data-reveal>
+          <h3>RESPONSE CHECK</h3>
+          <ul><li>Base64 JSON</li><li>Base64 data URI</li><li>HTTP(S) image URL</li><li>Direct image response</li><li>Simple SSE response</li><li>Actual pixel-size validation</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="safety" id="safety" aria-labelledby="safety-title">
+      <div class="safety__art" aria-hidden="true"><img src="../assets/icons/pixel-shield.svg" alt="" width="168" height="168"><span>KEY</span><strong>LOCAL</strong></div>
+      <div class="safety__copy" data-reveal>
+        <div class="section-heading">
+          <p><span>05</span> API KEY SAFETY</p>
+          <h2 id="safety-title">The repository is public. Your key stays local.</h2>
+        </div>
+        <p>The CLI reads the current user's CC-Switch configuration or credentials from environment variables. It has no <code>--api-key</code> argument and does not write keys into images, request metadata, or public logs.</p>
+        <ul>
+          <li><strong>Never print</strong> bearer tokens or real API keys</li>
+          <li><strong>Never commit</strong> <code>.env</code>, generated results, or request metadata</li>
+          <li><strong>Never share</strong> providers or keys between collaborators</li>
+        </ul>
+        <a href="https://github.com/Lijinzh/gpt-image-2-cli/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer">Read the security policy →</a>
+      </div>
+    </section>
+
+    <section class="feedback" id="feedback" aria-labelledby="feedback-title">
+      <div class="feedback__signal" aria-hidden="true">
+        <span>?</span>
+        <i></i><i></i><i></i>
+        <strong>USER<br>VOICE</strong>
+      </div>
+      <div class="feedback__copy" data-reveal>
+        <div class="section-heading">
+          <p><span>06</span> USER FEEDBACK</p>
+          <h2 id="feedback-title">Found a problem? Tell us right here.</h2>
+        </div>
+        <p>You do not need to know GitHub. Write your feedback here and the site will prepare an Issue title and body before taking you to GitHub for final confirmation.</p>
+        <div class="feedback__actions">
+          <button class="pixel-button pixel-button--lime" type="button" data-feedback-open>Open feedback form</button>
+          <a href="https://github.com/Lijinzh/gpt-image-2-cli/issues" target="_blank" rel="noopener noreferrer">View existing feedback →</a>
+        </div>
+        <p class="feedback__boundary"><strong>Why the final confirmation?</strong> This site never stores a GitHub token or publishes on your behalf. That protects repository access and prevents anonymous spam.</p>
+      </div>
+    </section>
+
+    <section class="final-cta" aria-labelledby="final-title">
+      <p>READY PLAYER?</p>
+      <h2 id="final-title">Give your next image to the terminal.</h2>
+      <div>
+        <button class="pixel-button pixel-button--lime" type="button" data-copy-target="codex-command">INSTALL WITH CODEX</button>
+        <a class="pixel-button pixel-button--cyan" href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">OPEN GITHUB</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div><strong>Made by Golden Philosophy</strong><span>© 2026 Golden Philosophy. All rights reserved. Open-source code licensed under MIT.</span></div>
+    <nav aria-label="Footer navigation"><a href="#quick-start">Quick start</a><a href="#examples">Gallery</a><a href="#safety">Safety</a><button type="button" data-feedback-open>Feedback</button><a href="https://github.com/Lijinzh/gpt-image-2-cli" target="_blank" rel="noopener noreferrer">GitHub</a></nav>
+  </footer>
+
+  <button class="feedback-fab" type="button" data-feedback-open><span aria-hidden="true">?</span>Feedback</button>
+
+  <dialog class="feedback-dialog" data-feedback-dialog aria-labelledby="feedback-dialog-title">
+    <form class="feedback-form" data-feedback-form>
+      <header>
+        <div><span>FEEDBACK.EXE</span><strong id="feedback-dialog-title">Create user feedback</strong></div>
+        <button type="button" aria-label="Close feedback form" data-feedback-close>×</button>
+      </header>
+      <div class="feedback-form__body">
+        <p class="feedback-form__intro">Submitting opens a new GitHub Issue page. If you are signed out, GitHub will ask you to sign in or register and then return to the prepared Issue. This page does not save your feedback.</p>
+        <label>Feedback type
+          <select name="category" required data-feedback-category>
+            <option value="bug">Problem / Bug</option>
+            <option value="feature">Feature request</option>
+            <option value="question">How-to question / Help</option>
+            <option value="other">Other feedback</option>
+          </select>
+        </label>
+        <label>Short title
+          <input name="subject" type="text" maxlength="90" placeholder="Example: gpt-image command is missing after installing on Windows" required data-feedback-subject>
+        </label>
+        <label>Details
+          <textarea name="details" rows="5" maxlength="2000" placeholder="What were you trying to do? What happened? What result did you expect?" required data-feedback-details></textarea>
+        </label>
+        <label>Steps or context <small>Optional</small>
+          <textarea name="steps" rows="3" maxlength="1200" placeholder="Example: install command → doctor → generate ..." data-feedback-steps></textarea>
+        </label>
+        <label>Environment <small>Optional</small>
+          <input name="environment" type="text" maxlength="300" placeholder="Example: Windows 11, Python 3.13, CC-Switch" data-feedback-environment>
+        </label>
+        <div class="feedback-preview">
+          <span>PUBLIC ISSUE PREVIEW</span>
+          <pre data-feedback-preview></pre>
+        </div>
+        <label class="feedback-consent">
+          <input name="consent" type="checkbox" required>
+          <span>I understand that the Issue will be public, and I confirm it contains no API key, token, private contact details, or other sensitive information.</span>
+        </label>
+        <div class="feedback-form__actions">
+          <button class="pixel-button pixel-button--lime" type="submit">Continue to GitHub Issue</button>
+          <button class="pixel-button pixel-button--cyan" type="button" data-feedback-copy>Copy feedback text</button>
+        </div>
+        <a class="feedback-native-link" href="https://github.com/Lijinzh/gpt-image-2-cli/issues/new?template=feedback.yml" target="_blank" rel="noopener noreferrer">Or use the native GitHub feedback form →</a>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="copy-toast" role="status" aria-live="polite" data-copy-toast>Copied to clipboard</div>
+</body>
+</html>

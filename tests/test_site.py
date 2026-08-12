@@ -28,9 +28,9 @@ class SiteParser(HTMLParser):
         self.text.append(data)
 
 
-def parse_site() -> SiteParser:
+def parse_site(page: Path | None = None) -> SiteParser:
     parser = SiteParser()
-    parser.feed((DOCS / "index.html").read_text(encoding="utf-8"))
+    parser.feed((page or DOCS / "index.html").read_text(encoding="utf-8"))
     return parser
 
 
@@ -57,17 +57,38 @@ def test_site_has_required_public_content() -> None:
 
 
 def test_site_local_links_and_assets_resolve() -> None:
-    parser = parse_site()
-    for reference in parser.references:
-        parsed = urlparse(reference)
-        if parsed.scheme or reference.startswith(("mailto:", "tel:")):
-            continue
-        if reference.startswith("#"):
-            assert reference[1:] in parser.ids
-            continue
-        path = reference.split("#", 1)[0].split("?", 1)[0]
-        if path:
-            assert (DOCS / path).is_file(), reference
+    for page in (DOCS / "index.html", DOCS / "en" / "index.html"):
+        parser = parse_site(page)
+        for reference in parser.references:
+            parsed = urlparse(reference)
+            if parsed.scheme or reference.startswith(("mailto:", "tel:")):
+                continue
+            if reference.startswith("#"):
+                assert reference[1:] in parser.ids
+                continue
+            path = reference.split("#", 1)[0].split("?", 1)[0]
+            if path:
+                target = (page.parent / path).resolve()
+                assert target.is_file() or (target / "index.html").is_file(), reference
+
+
+def test_english_site_is_complete_and_switchable() -> None:
+    page = DOCS / "en" / "index.html"
+    html = page.read_text(encoding="utf-8")
+    content = " ".join(parse_site(page).text)
+    assert '<html lang="en">' in html
+    assert "Install once. Generate with confidence." in content
+    assert "Eight films. Eight pixel-art stories." in content
+    assert "Open feedback form" in content
+    assert html.count("data-gallery-slide") == 8
+    assert html.count("data-gallery-thumb=") == 8
+    assert "Switch homepage visual theme" in html
+    assert html.count('data-theme="') == 3
+    assert 'href="../?lang=zh"' in html
+    assert 'href="./?lang=en"' in html
+    assert 'aria-current="page">EN</a>' in html
+    assert 'hreflang="zh-CN"' in html
+    assert 'hreflang="en"' in html
 
 
 def test_site_javascript_and_css_are_wired() -> None:
@@ -99,6 +120,17 @@ def test_site_javascript_and_css_are_wired() -> None:
     assert "data-gallery-use" in javascript
     assert "pointerdown" in javascript
     assert "ArrowRight" in javascript
+    assert "gpt-image-site-language" in javascript
+    assert "Copied to clipboard" in javascript
+    assert "Feedback type" in javascript
+    assert "data-theme-switcher" in html
+    assert html.count('data-theme="') == 3
+    assert "gpt-image-site-visual-theme" in javascript
+    assert "applyVisualTheme" in javascript
+    assert 'url("assets/examples/star-wars-twin-sunset.png")' in stylesheet
+    assert 'url("assets/examples/silence-prison-corridor.png")' in stylesheet
+    assert 'url("assets/examples/constantine-cathedral.png")' in stylesheet
+    assert "operator-orbit" in stylesheet
     assert "prefers-reduced-motion" in stylesheet
     assert (DOCS / ".nojekyll").is_file()
 
@@ -114,13 +146,17 @@ def test_github_feedback_issue_form_exists() -> None:
 
 
 def test_gallery_prompts_match_the_cli_generation_manifest() -> None:
-    html = (DOCS / "index.html").read_text(encoding="utf-8")
+    pages = [
+        (DOCS / "index.html").read_text(encoding="utf-8"),
+        (DOCS / "en" / "index.html").read_text(encoding="utf-8"),
+    ]
     manifest = runpy.run_path(
         str(ROOT / "scripts" / "generate_gallery_images.py"),
         run_name="gallery_manifest",
     )
     scenes = manifest["SCENES"]
     assert len(scenes) == 8
-    for scene in scenes:
-        assert scene.filename in html
-        assert f'data-prompt="{scene.prompt}"' in html
+    for html in pages:
+        for scene in scenes:
+            assert scene.filename in html
+            assert f'data-prompt="{scene.prompt}"' in html

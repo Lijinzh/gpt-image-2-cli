@@ -16,6 +16,7 @@ from gpt_image_cli.updater import (
     _verify_wheel,
     automatic_update_notice,
     check_for_updates,
+    install_update,
 )
 
 
@@ -174,3 +175,44 @@ def test_automatic_notice_can_be_disabled(monkeypatch: object, tmp_path: Path) -
         lambda **_kwargs: pytest.fail("disabled update check should not use the network"),
     )
     assert automatic_update_notice(state_path=tmp_path / "state.json") is None
+
+
+def test_install_update_schedules_verified_wheel(
+    monkeypatch: object, tmp_path: Path
+) -> None:
+    release = candidate("github", "0.3.0")
+    launched: list[Path] = []
+
+    monkeypatch.setattr("gpt_image_cli.updater.shutil.which", lambda _name: "uv")
+    monkeypatch.setattr(
+        "gpt_image_cli.updater._uv_manages_current_environment",
+        lambda _uv: True,
+    )
+    monkeypatch.setattr(
+        "gpt_image_cli.updater._update_work_dir",
+        lambda: tmp_path / "updates",
+    )
+
+    def fake_download(_candidate: object, destination: Path, **_kwargs: object) -> Path:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(b"verified wheel")
+        return destination
+
+    def fake_write_helper(_uv: str, _wheel: Path, _candidate: object) -> Path:
+        helper = tmp_path / "updates" / "install-update.ps1"
+        helper.write_text("# helper", encoding="utf-8")
+        return helper
+
+    monkeypatch.setattr("gpt_image_cli.updater.download_update", fake_download)
+    monkeypatch.setattr("gpt_image_cli.updater._write_update_helper", fake_write_helper)
+    monkeypatch.setattr(
+        "gpt_image_cli.updater._launch_update_helper", lambda helper: launched.append(helper)
+    )
+
+    result = install_update(release)
+
+    assert result["success"] is True
+    assert result["updated"] is False
+    assert result["update_scheduled"] is True
+    assert result["version"] == "0.3.0"
+    assert launched == [tmp_path / "updates" / "install-update.ps1"]

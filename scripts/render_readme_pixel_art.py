@@ -1,4 +1,4 @@
-"""Render the deterministic pixel-art illustration used by the README."""
+"""Render deterministic pixel-art illustrations used by the README and website."""
 
 from __future__ import annotations
 
@@ -11,6 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "assets" / "examples" / "star-wars-pixel-art.png"
 CYBER_OUTPUT = ROOT / "docs" / "assets" / "examples" / "cyberpunk-courier-pixel-art.png"
 GREAT_WALL_OUTPUT = ROOT / "docs" / "assets" / "examples" / "great-wall-starfleet-pixel-art.png"
+OBSERVATORY_OUTPUT = ROOT / "docs" / "assets" / "examples" / "pixel-snow-observatory.png"
+ICON_OUTPUT = ROOT / "docs" / "assets" / "icons" / "pixel-space-operator.png"
 PIXEL_SIZE = (160, 96)
 SCALE = 8
 
@@ -268,7 +270,125 @@ def _render_great_wall_starfleet() -> Path:
     return GREAT_WALL_OUTPUT
 
 
+def _render_pixel_observatory() -> Path:
+    image = Image.new("RGB", (192, 128), "#050713")
+    draw = ImageDraw.Draw(image)
+
+    bands = (
+        (0, 24, "#050713"),
+        (24, 47, "#0b1535"),
+        (47, 66, "#24245b"),
+        (66, 79, "#7b326d"),
+    )
+    for top, bottom, color in bands:
+        draw.rectangle((0, top, 191, bottom), fill=color)
+
+    rng = random.Random(2088)
+    for _ in range(118):
+        x = rng.randrange(2, 190)
+        y = rng.randrange(2, 66)
+        size = 2 if rng.random() < 0.08 else 1
+        star_color = rng.choice(("#13f4ef", "#f7f4ff", "#ff3bd4"))
+        draw.rectangle((x, y, x + size - 1, y + size - 1), fill=star_color)
+
+    draw.rectangle((139, 18, 158, 37), fill="#ff3bd4")
+    draw.rectangle((135, 22, 162, 33), fill="#ff3bd4")
+    draw.rectangle((143, 22, 154, 33), fill="#ff7ce5")
+    draw.rectangle((0, 79, 191, 127), fill="#091b35")
+
+    rear_mountains = (
+        (0, 95), (38, 52), (66, 89), (101, 46), (130, 92),
+        (168, 58), (191, 82), (191, 127), (0, 127),
+    )
+    front_mountains = (
+        (0, 105), (46, 74), (75, 101), (109, 68), (143, 104),
+        (176, 76), (191, 91), (191, 127), (0, 127),
+    )
+    snow_line = ((0, 104), (46, 74), (75, 101), (109, 68), (143, 104), (176, 76), (191, 91))
+    draw.polygon(rear_mountains, fill="#102c4c")
+    draw.polygon(front_mountains, fill="#174167")
+    draw.line(snow_line, fill="#6f8eb3", width=2)
+
+    draw.rectangle((0, 111, 191, 127), fill="#071626")
+    draw.rectangle((0, 113, 191, 115), fill="#13f4ef")
+    draw.rectangle((0, 117, 191, 127), fill="#081022")
+    for x in range(0, 192, 16):
+        draw.line((96, 114, x, 127), fill="#263466")
+    for y in (119, 123):
+        draw.line((0, y, 191, y), fill="#263466")
+
+    # Observatory platform and modules.
+    draw.rectangle((47, 86, 148, 103), fill="#0b1028", outline="#13f4ef", width=2)
+    draw.rectangle((52, 80, 95, 99), fill="#111a3c", outline="#ff3bd4")
+    draw.rectangle((57, 85, 62, 91), fill="#b8ff4a")
+    draw.rectangle((68, 85, 74, 91), fill="#13f4ef")
+    draw.rectangle((80, 85, 88, 91), fill="#ff3bd4")
+    draw.rectangle((100, 77, 139, 100), fill="#101638", outline="#13f4ef")
+    draw.rectangle((105, 82, 112, 90), fill="#13f4ef")
+    draw.rectangle((119, 82, 126, 90), fill="#ff3bd4")
+    draw.rectangle((132, 82, 136, 91), fill="#b8ff4a")
+
+    # Dome and telescope.
+    draw.rectangle((65, 69, 91, 84), fill="#18244e", outline="#13f4ef")
+    draw.rectangle((69, 64, 87, 69), fill="#283766", outline="#13f4ef")
+    draw.rectangle((73, 60, 83, 64), fill="#536b9c")
+    draw.rectangle((106, 64, 109, 78), fill="#f7f4ff")
+    draw.rectangle((109, 60, 123, 65), fill="#283766", outline="#ff3bd4")
+    draw.rectangle((121, 58, 127, 67), fill="#ff3bd4")
+    draw.line((124, 61, 145, 47), fill="#13f4ef", width=2)
+    draw.rectangle((144, 45, 148, 49), fill="#b8ff4a")
+
+    # Small space operator in the foreground.
+    draw.rectangle((28, 88, 38, 100), fill="#f7f4ff", outline="#13f4ef")
+    draw.rectangle((30, 84, 36, 89), fill="#f7f4ff")
+    draw.rectangle((31, 85, 35, 87), fill="#ff3bd4")
+    draw.rectangle((26, 91, 29, 98), fill="#b8ff4a")
+    draw.rectangle((37, 91, 40, 98), fill="#13f4ef")
+    draw.rectangle((29, 100, 32, 106), fill="#f7f4ff")
+    draw.rectangle((35, 100, 38, 106), fill="#f7f4ff")
+
+    OBSERVATORY_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    image.resize((1536, 1024), Image.Resampling.NEAREST).save(
+        OBSERVATORY_OUTPUT,
+        format="PNG",
+        optimize=True,
+    )
+    return OBSERVATORY_OUTPUT
+
+
+def _render_space_operator_icon() -> Path:
+    image = Image.new("RGBA", (32, 32), (5, 7, 19, 255))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((1, 1, 30, 30), fill="#0a1027", outline="#13f4ef", width=2)
+    draw.rectangle((4, 4, 27, 27), outline="#263466")
+
+    # Helmet and face: a friendly space-station operator / alien hybrid.
+    draw.rectangle((9, 6, 22, 9), fill="#f7f4ff")
+    draw.rectangle((7, 9, 24, 19), fill="#f7f4ff")
+    draw.rectangle((9, 19, 22, 23), fill="#f7f4ff")
+    draw.rectangle((9, 10, 22, 18), fill="#111a3c")
+    draw.rectangle((11, 12, 13, 14), fill="#b8ff4a")
+    draw.rectangle((18, 12, 20, 14), fill="#b8ff4a")
+    draw.rectangle((14, 16, 17, 17), fill="#13f4ef")
+    draw.rectangle((5, 12, 8, 17), fill="#ff3bd4")
+    draw.rectangle((23, 12, 26, 17), fill="#13f4ef")
+    draw.rectangle((11, 23, 20, 26), fill="#ff3bd4")
+    draw.rectangle((13, 24, 18, 27), fill="#b8ff4a")
+    draw.rectangle((3, 25, 6, 28), fill="#13f4ef")
+    draw.rectangle((25, 4, 28, 7), fill="#ff3bd4")
+
+    ICON_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    image.resize((256, 256), Image.Resampling.NEAREST).save(
+        ICON_OUTPUT,
+        format="PNG",
+        optimize=True,
+    )
+    return ICON_OUTPUT
+
+
 if __name__ == "__main__":
     print(render())
     print(_render_cyberpunk_courier())
     print(_render_great_wall_starfleet())
+    print(_render_pixel_observatory())
+    print(_render_space_operator_icon())

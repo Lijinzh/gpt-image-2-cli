@@ -16,7 +16,12 @@ ASSETS = (
 SITE_ASSETS = (
     "docs/assets/examples/cyberpunk-courier-pixel-art.png",
     "docs/assets/examples/great-wall-starfleet-pixel-art.png",
-    "docs/assets/examples/snow-observatory-generated.png",
+    "docs/assets/examples/pixel-snow-observatory.png",
+)
+
+SITE_ICONS = (
+    "docs/assets/icons/pixel-space-operator.png",
+    "docs/assets/icons/pixel-space-operator.svg",
 )
 
 
@@ -37,3 +42,12 @@ def test_site_example_images_are_valid() -> None:
             assert image.format == "PNG"
             assert image.width >= 1280
             assert image.height >= 768
+
+
+def test_site_brand_icons_are_valid() -> None:
+    for relative_path in SITE_ICONS:
+        assert (ROOT / relative_path).is_file()
+
+    with Image.open(ROOT / SITE_ICONS[0]) as image:
+        assert image.format == "PNG"
+        assert image.size == (256, 256)

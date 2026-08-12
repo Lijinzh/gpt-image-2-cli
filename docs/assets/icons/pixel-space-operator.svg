@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-labelledby="title">
+  <title id="title">GPT-Image CLI pixel space operator</title>
+  <g shape-rendering="crispEdges">
+    <rect width="32" height="32" fill="#050713"/>
+    <rect x="1" y="1" width="30" height="30" fill="#0a1027" stroke="#13f4ef" stroke-width="2"/>
+    <path fill="#f7f4ff" d="M9 6h14v3h2v11h-2v4H9v-4H7V9h2z"/>
+    <path fill="#111a3c" d="M9 10h14v9H9z"/>
+    <path fill="#b8ff4a" d="M11 12h3v3h-3zm7 0h3v3h-3z"/>
+    <path fill="#13f4ef" d="M14 16h4v2h-4zM23 12h4v6h-4zM3 25h4v4H3z"/>
+    <path fill="#ff3bd4" d="M5 12h3v6H5zm6 12h10v3H11zM25 4h4v4h-4z"/>
+  </g>
+</svg>

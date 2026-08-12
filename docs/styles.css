@@ -34,7 +34,8 @@ code, pre { font-family: var(--mono); }
 
 .site-header { position: sticky; top: 0; z-index: 50; display: grid; grid-template-columns: auto 1fr auto; align-items: center; min-height: 86px; padding: 0 max(22px, calc((100vw - var(--max)) / 2)); background: rgba(5,7,19,.93); border-bottom: 2px solid var(--cyan); backdrop-filter: blur(16px); }
 .brand { display: flex; gap: 13px; align-items: center; text-decoration: none; }
-.brand__mark { display: grid; place-items: center; width: 54px; height: 54px; color: var(--lime); background: #0a1027; border: 3px solid var(--cyan); box-shadow: 5px 5px 0 var(--pink); font: 900 17px/1 var(--mono); }
+.brand__mark { display: grid; place-items: center; width: 54px; height: 54px; padding: 3px; background: #0a1027; border: 3px solid var(--cyan); box-shadow: 5px 5px 0 var(--pink); }
+.brand__mark img { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 .brand__copy { display: grid; gap: 4px; }
 .brand__copy strong { font: 900 18px/1 var(--mono); letter-spacing: .03em; }
 .brand__copy small { color: var(--cyan); font: 800 9px/1 var(--mono); letter-spacing: .08em; }
@@ -169,7 +170,7 @@ code, pre { font-family: var(--mono); }
 .final-cta h2 { margin: 0; font-size: clamp(38px, 4.8vw, 70px); letter-spacing: -.04em; }
 .final-cta > div { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 40px; }
 .site-footer { display: flex; justify-content: space-between; gap: 36px; align-items: center; padding: 40px max(22px, calc((100vw - var(--max)) / 2)); background: #03050d; border-top: 2px solid var(--cyan); }
-.site-footer > div { display: grid; gap: 8px; }.site-footer strong { font: 900 16px/1 var(--mono); }.site-footer span { color: var(--muted); font: 800 9px/1 var(--mono); }
+.site-footer > div { display: grid; gap: 8px; }.site-footer strong { color: var(--lime); font: 900 16px/1 var(--mono); }.site-footer span { max-width: 720px; color: var(--muted); font: 800 9px/1.5 var(--mono); }
 .site-footer nav { display: flex; flex-wrap: wrap; gap: 24px; }.site-footer a, .site-footer button { padding: 0; color: var(--muted); background: none; border: 0; cursor: pointer; font-size: 13px; font-weight: 800; text-decoration: none; }.site-footer a:hover, .site-footer button:hover { color: var(--cyan); }
 .feedback-fab { position: fixed; bottom: 24px; left: 24px; z-index: 80; display: flex; gap: 10px; align-items: center; min-height: 48px; padding: 0 17px 0 8px; color: var(--ink); background: var(--panel); border: 3px solid var(--cyan); box-shadow: 6px 6px 0 var(--pink); cursor: pointer; font: 900 12px/1 var(--mono); }
 .feedback-fab span { display: grid; place-items: center; width: 28px; aspect-ratio: 1; color: var(--bg); background: var(--lime); font-size: 20px; }

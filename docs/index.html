@@ -156,16 +156,39 @@
         <p class="section-heading__lead">所有示意图均清楚标注来源。点击任意提示词，可直接送进上面的命令实验台。</p>
       </div>
       <div class="gallery">
-        <article class="gallery-item gallery-item--wide" data-reveal>
-          <figure>
-            <img src="assets/examples/pixel-snow-observatory.png" alt="雪山湖畔未来观测站的霓虹像素风示意图" width="1536" height="1024" loading="lazy">
-            <figcaption>REPRODUCIBLE PIXEL PREVIEW / 1536 × 1024</figcaption>
-          </figure>
+        <article class="gallery-item gallery-item--wide gallery-item--observatory" data-reveal data-observatory-carousel aria-roledescription="轮播图" aria-label="雪山湖畔未来观测站：写实与 32-bit 像素版本">
+          <div class="observatory-carousel" data-carousel-viewport tabindex="0">
+            <div class="observatory-carousel__track" data-carousel-track>
+              <figure class="observatory-slide is-active" data-carousel-slide aria-hidden="false">
+                <img src="assets/examples/observatory-photorealistic.png" alt="雪山湖畔未来观测站的写实生成图" width="1536" height="1024" loading="lazy">
+                <figcaption>REALISTIC CLI OUTPUT / 1536 × 1024</figcaption>
+              </figure>
+              <figure class="observatory-slide observatory-slide--pixel" data-carousel-slide aria-hidden="true">
+                <img src="assets/examples/pixel-snow-observatory.png" alt="同一雪山湖畔未来观测站的精细 32-bit 街机像素版本" width="1536" height="1024" loading="lazy">
+                <figcaption>DETAILED 32-BIT PIXEL SCENE / 1536 × 1024</figcaption>
+              </figure>
+            </div>
+            <button class="observatory-carousel__arrow observatory-carousel__arrow--previous" type="button" data-carousel-previous aria-label="查看上一张：写实版本">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 9 15 24l15 15M16 24h23"/></svg>
+            </button>
+            <button class="observatory-carousel__arrow observatory-carousel__arrow--next" type="button" data-carousel-next aria-label="查看下一张：32-bit 像素版本">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="m18 9 15 15-15 15M32 24H9"/></svg>
+            </button>
+            <div class="observatory-carousel__status" aria-live="polite" aria-atomic="true">
+              <span data-carousel-label>写实版本</span>
+              <span data-carousel-count>01 / 02</span>
+            </div>
+            <div class="observatory-carousel__dots" aria-label="选择观测站图片">
+              <button class="is-active" type="button" data-carousel-dot="0" aria-label="查看写实版本" aria-current="true"></button>
+              <button type="button" data-carousel-dot="1" aria-label="查看 32-bit 像素版本" aria-current="false"></button>
+            </div>
+            <p class="observatory-carousel__hint">点击图片或箭头切换 · 触摸左右滑动</p>
+          </div>
           <div class="gallery-item__copy">
-            <span>可复现像素示意图</span>
+            <span>写实生成图 × 32-bit 像素场景</span>
             <h3>雪山湖畔的未来观测站</h3>
-            <p>由仓库脚本确定性绘制，使用网站同款青色、洋红与荧光绿配色，展示横向像素场景的构图参考。</p>
-            <button type="button" data-use-prompt="雪山湖畔的未来观测站，圆顶天文台与指向星空的望远镜，霓虹青色、洋红和荧光绿，16-bit 像素艺术，复古街机氛围，无文字">使用这个提示词</button>
+            <p>左右切换同一主题的两个视觉方向：接近实物摄影的生成结果，以及拥有分层雪山、湖面反射、机械设施和完整宇航员角色的精细街机像素版本。</p>
+            <button type="button" data-use-prompt="雪山湖畔的未来观测站，复杂的圆顶天文台、着装精细的太空操作员、湖面反射与远山层次，32-bit 街机像素游戏场景，丰富机械细节与戏剧性灯光，无文字、无 Logo">使用像素版提示词</button>
           </div>
         </article>
         <article class="gallery-item" data-reveal>

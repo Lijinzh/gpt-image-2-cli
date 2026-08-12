@@ -16,6 +16,7 @@ ASSETS = (
 SITE_ASSETS = (
     "docs/assets/examples/cyberpunk-courier-pixel-art.png",
     "docs/assets/examples/great-wall-starfleet-pixel-art.png",
+    "docs/assets/examples/observatory-photorealistic.png",
     "docs/assets/examples/pixel-snow-observatory.png",
 )
 

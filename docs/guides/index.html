@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#050713">
+  <meta name="description" content="GPT-Image 2 CLI 任务型指南：CC-Switch、环境变量、CI、代理、画布和安全更新。">
+  <title>Guides and Tutorials · GPT-Image 2 CLI Docs</title>
+  <link rel="canonical" href="https://lijinzh.github.io/gpt-image-2-cli/guides/"><link rel="icon" href="../assets/icons/pixel-space-operator.svg" type="image/svg+xml"><link rel="stylesheet" href="../docs-page.css"><script src="../docs-page.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="docs-header"><a class="docs-brand" href="../"><img src="../assets/icons/pixel-space-operator.png" alt="" width="46" height="46"><span><strong>GPT-IMAGE 2 CLI</strong><small>DOCUMENTATION / 中文</small></span></a><label class="docs-search"><span hidden>筛选文档栏目</span><input type="search" placeholder="筛选文档栏目…" data-docs-search><kbd>/</kbd></label><nav class="docs-header__links"><a href="../">项目首页</a><a href="https://github.com/Lijinzh/gpt-image-2-cli">GitHub</a></nav><button class="docs-menu" type="button" aria-expanded="false" data-docs-menu>文档目录</button></header>
+  <div class="docs-shell">
+    <aside class="docs-sidebar" data-docs-sidebar><p class="docs-sidebar__label">DOCUMENT MAP</p><nav class="doc-nav"><a href="../getting-started/"><strong>Getting Started</strong><small>安装与第一次生成</small></a><a href="../using/"><strong>Using</strong><small>日常命令与工作流</small></a><a href="../features/"><strong>Features</strong><small>能力、可靠性与安全</small></a><a href="../guides/" aria-current="page"><strong>Guides and Tutorials</strong><small>按任务学习</small></a><a href="../developer-guide/"><strong>Developer Guide</strong><small>开发、测试与发布</small></a><a href="../reference/"><strong>Reference</strong><small>命令、变量与退出码</small></a></nav><p class="docs-sidebar__meta">每个教程都从安全检查开始，并给出明确的完成条件。</p></aside>
+    <main class="docs-content" id="main-content">
+      <header class="docs-hero"><p class="docs-hero__path">DOCS / 04 / GUIDES AND TUTORIALS</p><h1>按真实任务，<br><em>一步步完成。</em></h1><p class="docs-hero__lead">选择与你当前环境最接近的场景，先诊断、再预演、最后执行可能计费或修改安装的操作。</p></header>
+      <section id="cc-switch"><h2>教程：使用当前 CC-Switch 供应商</h2><ol class="task-list"><li><strong>确认当前 Codex 供应商</strong><p>CLI 默认只读打开 <code>~/.cc-switch/cc-switch.db</code>，不会修改数据库。</p></li><li><strong>诊断模型与网络</strong><pre><code>gpt-image doctor</code></pre><p>确认 <code>source</code> 来自 CC-Switch，且 <code>model_available</code> 为 true。</p></li><li><strong>进行不计费预演</strong><pre><code>gpt-image generate "暖色工作室中的复古机器人" --size square -o ./artifacts/robot.png --dry-run</code></pre></li><li><strong>提交生成</strong><pre><code>gpt-image generate "暖色工作室中的复古机器人" --size square -o ./artifacts/robot.png</code></pre></li></ol><div class="callout"><strong>完成条件</strong><p>终端返回 <code>success: true</code>，图片经过格式与 1024×1024 尺寸验证并保存到目标路径。</p></div></section>
+      <section id="environment"><h2>教程：不使用 CC-Switch</h2><p>通过环境变量连接任意 OpenAI 兼容中转。示例 Key 必须替换为仅保存在本机环境中的真实值。</p><div class="doc-grid"><article class="doc-card"><h3>Windows PowerShell</h3><pre><code>$env:GPT_IMAGE_API_BASE = "https://relay.example/v1"
+$env:GPT_IMAGE_API_KEY = "your-key"
+gpt-image doctor</code></pre></article><article class="doc-card"><h3>Linux / macOS</h3><pre><code>export GPT_IMAGE_API_BASE="https://relay.example/v1"
+export GPT_IMAGE_API_KEY="your-key"
+gpt-image doctor</code></pre></article></div><p>远程 API 默认必须使用 HTTPS。localhost 自动允许 HTTP，其他 HTTP 地址只有明确加入 <code>--allow-http</code> 才会接受。</p></section>
+      <section id="ci"><h2>教程：在 CI 中做无计费验证</h2><p>CI 不应该自动生成付费图片。使用 JSON 模式和 <code>--dry-run</code> 验证配置与参数，同时设置 <code>GPT_IMAGE_DISABLE_UPDATE_CHECK=1</code>。</p><pre><code>gpt-image generate "ci smoke test" --size square -o ./artifacts/ci-smoke.png --dry-run --json</code></pre><p>解析 JSON 并断言 <code>success</code> 与 <code>dry_run</code> 均为 true。需要测试真实模型列表时可以运行 <code>doctor --json</code>，但它会发出只读网络请求并需要 API 凭据。</p></section>
+      <section id="canvas"><h2>教程：处理中转站忽略画布</h2><ol class="task-list"><li><strong>先保持严格模式</strong><p>正常指定 <code>--size landscape</code>。若服务端返回其他尺寸，CLI 不写文件并说明实际画布。</p></li><li><strong>判断是否接受裁切</strong><p>如果画面边缘不可丢失，应调整提示词或更换供应商。</p></li><li><strong>主动修正输出</strong><pre><code>gpt-image generate "宽景雪山天文台，主体位于中央" --size landscape --fit-output-size -o ./artifacts/observatory.png</code></pre><p>图片会居中裁切并缩放到 1536×1024，结果统一保存为 PNG。</p></li></ol></section>
+      <section id="proxy"><h2>教程：排查代理连接</h2><ol class="task-list"><li><strong>查看当前代理模式</strong><pre><code>gpt-image doctor --json</code></pre><p>检查 <code>proxy_mode</code> 是 explicit、environment、windows-system、direct 或 disabled。</p></li><li><strong>显式验证本地代理</strong><pre><code>gpt-image doctor --proxy http://127.0.0.1:7890</code></pre></li><li><strong>排除代理影响</strong><pre><code>gpt-image doctor --no-proxy</code></pre></li><li><strong>只调整连接阶段</strong><pre><code>gpt-image doctor --connect-timeout 60 --connect-retries 3</code></pre><p>已提交的图片请求仍然不会自动重试。</p></li></ol></section>
+      <section id="update"><h2>教程：安全检查并更新</h2><ol class="task-list"><li><strong>查看当前版本</strong><pre><code>gpt-image --version</code></pre></li><li><strong>只检查公开渠道</strong><pre><code>gpt-image update --check --source auto</code></pre></li><li><strong>诊断单一镜像</strong><pre><code>gpt-image update --check --source github
+gpt-image update --check --source gitee
+gpt-image update --check --source gitcode</code></pre></li><li><strong>安排已验证更新</strong><pre><code>gpt-image update</code></pre><p>当前命令退出后，独立助手才会替换 uv tool 隔离环境。下一次调用 <code>gpt-image --version</code> 验证新版本。</p></li></ol><div class="callout callout--warning"><strong>非 uv tool 安装</strong><p>更新器会拒绝擅自覆盖 pipx、系统包管理器或源码虚拟环境。请用原来的安装方式升级。</p></div></section>
+      <section id="troubleshoot"><h2>故障定位速查</h2><div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>现象</th><th>优先检查</th></tr></thead><tbody><tr><td>CONFIG ERROR</td><td>API base 与 Key 是否成对存在；CC-Switch 是否有当前 Codex 供应商</td></tr><tr><td>模型不可用，退出码 4</td><td><code>doctor --json</code> 中的 <code>image_models</code> 与目标模型名</td></tr><tr><td>读超时并提示可能计费</td><td>先检查供应商后台生成记录，不要立即重复提交</td></tr><tr><td>API 忽略尺寸</td><td>判断是否接受 <code>--fit-output-size</code>，否则更换 API</td></tr><tr><td>UPDATE ERROR</td><td>Release 资产、镜像一致性、代理，以及安装是否由 uv tool 管理</td></tr></tbody></table></div></section>
+      <nav class="page-nav"><a href="../features/"><span>← PREVIOUS</span><strong>Features</strong></a><a href="../developer-guide/"><span>NEXT →</span><strong>Developer Guide</strong></a></nav>
+    </main>
+    <aside class="docs-toc"><p>ON THIS PAGE</p><nav><a href="#cc-switch">CC-Switch</a><a href="#environment">环境变量</a><a href="#ci">CI 验证</a><a href="#canvas">画布修正</a><a href="#proxy">代理排查</a><a href="#update">安全更新</a><a href="#troubleshoot">故障速查</a></nav></aside>
+  </div>
+  <footer class="docs-footer">GPT-Image 2 CLI Documentation · MIT License · 文档以已验证的公开能力为准</footer>
+</body></html>

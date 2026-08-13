@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050713">
+  <meta name="description" content="了解 GPT-Image 2 CLI 的跨平台、兼容性、可靠性、安全与自动更新能力。">
+  <title>Features · GPT-Image 2 CLI Docs</title>
+  <link rel="canonical" href="https://lijinzh.github.io/gpt-image-2-cli/features/">
+  <link rel="icon" href="../assets/icons/pixel-space-operator.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../docs-page.css">
+  <script src="../docs-page.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="docs-header"><a class="docs-brand" href="../"><img src="../assets/icons/pixel-space-operator.png" alt="" width="46" height="46"><span><strong>GPT-IMAGE 2 CLI</strong><small>DOCUMENTATION / 中文</small></span></a><label class="docs-search"><span hidden>筛选文档栏目</span><input type="search" placeholder="筛选文档栏目…" data-docs-search><kbd>/</kbd></label><nav class="docs-header__links"><a href="../">项目首页</a><a href="https://github.com/Lijinzh/gpt-image-2-cli">GitHub</a></nav><button class="docs-menu" type="button" aria-expanded="false" data-docs-menu>文档目录</button></header>
+  <div class="docs-shell">
+    <aside class="docs-sidebar" data-docs-sidebar><p class="docs-sidebar__label">DOCUMENT MAP</p><nav class="doc-nav"><a href="../getting-started/"><strong>Getting Started</strong><small>安装与第一次生成</small></a><a href="../using/"><strong>Using</strong><small>日常命令与工作流</small></a><a href="../features/" aria-current="page"><strong>Features</strong><small>能力、可靠性与安全</small></a><a href="../guides/"><strong>Guides and Tutorials</strong><small>按任务学习</small></a><a href="../developer-guide/"><strong>Developer Guide</strong><small>开发、测试与发布</small></a><a href="../reference/"><strong>Reference</strong><small>命令、变量与退出码</small></a></nav><p class="docs-sidebar__meta">设计原则：<br>轻量 · 可审计<br>跨平台 · 安全失败</p></aside>
+    <main class="docs-content" id="main-content">
+      <header class="docs-hero"><p class="docs-hero__path">DOCS / 03 / FEATURES</p><h1>不是简单封装，<br><em>是可靠边界。</em></h1><p class="docs-hero__lead">本工具围绕兼容中转、大图等待、计费风险、输出完整性和公开 Release 更新建立明确边界，同时保持单进程、同步调用与少量依赖。</p></header>
+      <section id="generation"><h2>图像生成能力</h2><div class="doc-grid"><article class="doc-card"><h3>三种正式画布</h3><p><code>1024x1024</code>、<code>1536x1024</code>、<code>1024x1536</code>，并提供 square、landscape、portrait 别名。</p></article><article class="doc-card"><h3>1–10 张输出</h3><p>一次请求支持多张图片，文件路径自动编号，写入前统一验证。</p></article><article class="doc-card"><h3>质量和背景</h3><p>支持 <code>auto</code>、<code>low</code>、<code>medium</code>、<code>high</code>，背景支持 <code>auto</code> 与 <code>opaque</code>。</p></article><article class="doc-card"><h3>画布修正</h3><p>默认严格拒绝尺寸不符；显式选择后可居中裁切并高质量缩放。</p></article></div></section>
+      <section id="compatibility"><h2>OpenAI 兼容响应</h2><p>兼容 API 的响应并不总是统一。解析器会在有界深度内寻找并去重图片候选，支持：</p><ul><li><code>data[].b64_json</code> 与常见 <code>base64</code> / <code>image_base64</code> 字段；</li><li>Base64 data URI；</li><li>HTTP(S) 图片 URL；</li><li><code>message.images[].image_url.url</code> 等嵌套结构；</li><li>直接图片响应；</li><li>简单 Server-Sent Events 中的 JSON 数据行。</li></ul><p>对 <code>gpt-image-*</code> 兼容路由，工具不会主动发送部分实现会拒绝的 <code>response_format</code> 参数。</p></section>
+      <section id="reliability"><h2>面向大图的可靠性</h2><ol class="task-list"><li><strong>长等待而非误判失败</strong><p>默认读取超时 30 分钟，并在交互终端输出等待心跳。</p></li><li><strong>有限的安全重连</strong><p>只在请求尚未提交的连接建立阶段有限重连。</p></li><li><strong>计费风险可见</strong><p>提交后断连不自动重试，并明确标记请求可能已经计费。</p></li><li><strong>错误响应不伪装成功</strong><p>即使 HTTP 状态为 200，内嵌 <code>error</code> 对象也会被识别为失败。</p></li></ol></section>
+      <section id="integrity"><h2>图片与文件完整性</h2><ul><li>使用 Pillow 解码并执行格式验证。</li><li>读取实际宽高，显式尺寸不匹配时不写出文件。</li><li>限制 API 响应和 Release 元数据大小，避免无界内存消耗。</li><li>临时文件与目标文件位于同一目录，写入完成后原子替换。</li><li>默认拒绝覆盖已有文件和多图输出中的任何冲突路径。</li></ul></section>
+      <section id="configuration"><h2>配置与代理发现</h2><div class="doc-grid"><article class="doc-card"><h3>CC-Switch 只读发现</h3><p>只读取当前用户数据库中的当前 Codex 供应商，不复制数据库，不打印 API Key。</p></article><article class="doc-card"><h3>标准环境变量</h3><p>支持项目变量，也兼容 <code>OPENAI_BASE_URL</code> 与 <code>OPENAI_API_KEY</code>。</p></article><article class="doc-card"><h3>HTTPS 默认</h3><p>远程 API 必须使用 HTTPS；localhost 自动允许 HTTP，其他 HTTP 地址需要明确 <code>--allow-http</code>。</p></article><article class="doc-card"><h3>代理优先级</h3><p>显式代理、环境代理、Windows 系统代理与直连按确定顺序解析。</p></article></div></section>
+      <section id="updates"><h2>多源安全更新</h2><p>更新器可检查项目配置允许的 GitHub、Gitee 与 GitCode Release，并从可用来源中选择最高版本。自动模式下，同一版本在多个镜像的 wheel 大小或 SHA-256 不一致时立即停止。</p><div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>校验</th><th>失败时的行为</th></tr></thead><tbody><tr><td>固定仓库与 HTTPS 资产 URL</td><td>拒绝跨仓库或不安全下载</td></tr><tr><td>版本、标签与 wheel 文件名</td><td>拒绝名称或版本错配</td></tr><tr><td>声明大小与 SHA-256</td><td>删除临时文件，不安排安装</td></tr><tr><td>wheel 包名与内部版本</td><td>拒绝伪装或错误包</td></tr><tr><td><code>uv tool</code> 环境识别</td><td>提示通过原包管理器更新</td></tr></tbody></table></div><p>验证完成后也不会在当前进程里替换自己。Windows 使用隐藏 PowerShell 助手，Linux/macOS 使用分离的 <code>/bin/sh</code> 助手，等待当前命令退出后重建隔离环境。</p></section>
+      <section id="privacy"><h2>安全与隐私边界</h2><ul><li>没有 <code>--api-key</code> 参数，降低密钥进入 shell 历史的风险。</li><li>配置对象、错误与代理显示会清理凭据。</li><li>不把 API Key、请求元数据或配置写入生成图片。</li><li><code>--json</code> 和非交互调用不产生自动更新提示。</li><li>静态网站反馈不会持有 GitHub Token，而是让用户在 GitHub 页面最终确认。</li></ul><p>发现安全问题时，请阅读 <a href="https://github.com/Lijinzh/gpt-image-2-cli/blob/main/SECURITY.md">SECURITY.md</a> 并优先使用 GitHub 私密安全报告。</p></section>
+      <section id="platforms"><h2>跨平台支持</h2><p>CI 在 Ubuntu、Windows 和 macOS 上分别覆盖 Python 3.11 与 3.13。核心命令不依赖 Bash 或 PowerShell；只有退出后的更新助手按平台分支，并保持等价安装语义。</p><div class="callout"><strong>能力声明边界</strong><p>跨平台测试证明 CLI 本身可运行，但第三方兼容 API、网络代理和模型可用性仍由使用者环境与供应商决定。</p></div></section>
+      <nav class="page-nav"><a href="../using/"><span>← PREVIOUS</span><strong>Using</strong></a><a href="../guides/"><span>NEXT →</span><strong>Guides and Tutorials</strong></a></nav>
+    </main>
+    <aside class="docs-toc"><p>ON THIS PAGE</p><nav><a href="#generation">图像生成</a><a href="#compatibility">兼容响应</a><a href="#reliability">可靠性</a><a href="#integrity">文件完整性</a><a href="#configuration">配置与代理</a><a href="#updates">安全更新</a><a href="#privacy">安全与隐私</a><a href="#platforms">跨平台</a></nav></aside>
+  </div>
+  <footer class="docs-footer">GPT-Image 2 CLI Documentation · MIT License · 文档以已验证的公开能力为准</footer>
+</body>
+</html>

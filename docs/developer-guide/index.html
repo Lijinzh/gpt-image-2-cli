@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#050713">
+  <meta name="description" content="GPT-Image 2 CLI 开发者指南：架构、环境、测试、安全、贡献与发布。"><title>Developer Guide · GPT-Image 2 CLI Docs</title>
+  <link rel="canonical" href="https://lijinzh.github.io/gpt-image-2-cli/developer-guide/"><link rel="icon" href="../assets/icons/pixel-space-operator.svg" type="image/svg+xml"><link rel="stylesheet" href="../docs-page.css"><script src="../docs-page.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到正文</a><header class="docs-header"><a class="docs-brand" href="../"><img src="../assets/icons/pixel-space-operator.png" alt="" width="46" height="46"><span><strong>GPT-IMAGE 2 CLI</strong><small>DOCUMENTATION / 中文</small></span></a><label class="docs-search"><span hidden>筛选文档栏目</span><input type="search" placeholder="筛选文档栏目…" data-docs-search><kbd>/</kbd></label><nav class="docs-header__links"><a href="../">项目首页</a><a href="https://github.com/Lijinzh/gpt-image-2-cli">GitHub</a></nav><button class="docs-menu" type="button" aria-expanded="false" data-docs-menu>文档目录</button></header>
+  <div class="docs-shell">
+    <aside class="docs-sidebar" data-docs-sidebar><p class="docs-sidebar__label">DOCUMENT MAP</p><nav class="doc-nav"><a href="../getting-started/"><strong>Getting Started</strong><small>安装与第一次生成</small></a><a href="../using/"><strong>Using</strong><small>日常命令与工作流</small></a><a href="../features/"><strong>Features</strong><small>能力、可靠性与安全</small></a><a href="../guides/"><strong>Guides and Tutorials</strong><small>按任务学习</small></a><a href="../developer-guide/" aria-current="page"><strong>Developer Guide</strong><small>开发、测试与发布</small></a><a href="../reference/"><strong>Reference</strong><small>命令、变量与退出码</small></a></nav><p class="docs-sidebar__meta">仓库约定以根目录 <code>AGENTS.md</code> 为准。</p></aside>
+    <main class="docs-content" id="main-content">
+      <header class="docs-hero"><p class="docs-hero__path">DOCS / 05 / DEVELOPER GUIDE</p><h1>小而清晰，<br><em>可测试、可审计。</em></h1><p class="docs-hero__lead">项目刻意保持轻量。贡献应优先落在现有职责模块，配套行为测试，并保留 CLI、打包、更新和跨平台边界。</p></header>
+      <section id="setup"><h2>开发环境</h2><pre><code>git clone https://github.com/Lijinzh/gpt-image-2-cli.git
+cd gpt-image-2-cli
+uv sync --frozen
+uv run --frozen python -m gpt_image_cli --help</code></pre><p>需要 Python 3.11+。依赖与命令统一通过锁定的 uv 环境运行，不要绕过 <code>uv.lock</code> 安装一套难以复现的开发依赖。</p></section>
+      <section id="architecture"><h2>模块边界</h2><div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>模块</th><th>职责</th></tr></thead><tbody><tr><td><code>cli.py</code></td><td>参数解析、命令编排、终端与 JSON 输出</td></tr><tr><td><code>config.py</code></td><td>环境变量、URL 安全检查、CC-Switch 只读解析</td></tr><tr><td><code>proxy.py</code></td><td>显式、环境与 Windows 系统代理选择</td></tr><tr><td><code>models.py</code></td><td>请求参数验证和跨模块数据结构</td></tr><tr><td><code>client.py</code></td><td>HTTP 请求、超时、有限重连和图片下载</td></tr><tr><td><code>responses.py</code></td><td>JSON、SSE、Base64、URL 响应解析</td></tr><tr><td><code>image_io.py</code></td><td>图片验证、画布修正和原子写入</td></tr><tr><td><code>updater.py</code></td><td>Release 检查、完整性验证、延迟自更新</td></tr><tr><td><code>errors.py</code></td><td>可安全显示的错误类型与稳定退出码</td></tr></tbody></table></div><div class="callout"><strong>设计约束</strong><p>不要把网络传输、文件写入或配置探测塞回 <code>cli.py</code>；也不要为单一需求引入服务层、依赖注入框架、插件系统或不必要的异步抽象。</p></div></section>
+      <section id="workflow"><h2>实现一个改动</h2><ol class="task-list"><li><strong>确认行为边界</strong><p>判断属于参数编排、配置、传输、解析、图片写入还是更新流程。</p></li><li><strong>添加聚焦测试</strong><p>测试用户可见行为、退出码、JSON 字段和安全失败，而不是只覆盖内部实现。</p></li><li><strong>完成最小实现</strong><p>保留现有命令、参数、环境变量和跨平台语义。</p></li><li><strong>同步用户文档</strong><p>安装、配置、更新或 CLI 行为变化时更新 README 和本 Docs 站。</p></li><li><strong>运行完整检查</strong><pre><code>uv sync --frozen
+uv run --frozen pytest
+uv run --frozen ruff check .
+uv build
+uv run --frozen python -m gpt_image_cli --help</code></pre></li></ol></section>
+      <section id="testing"><h2>测试策略</h2><ul><li><strong>CLI：</strong>参数冲突、JSON 稳定性、密钥脱敏和入口点。</li><li><strong>配置：</strong>环境变量优先级、CC-Switch 数据库异常、HTTP 边界。</li><li><strong>传输：</strong>区分连接建立失败与提交后失败，避免重复计费。</li><li><strong>响应：</strong>所有兼容结构、损坏 Base64、无效 JSON/SSE。</li><li><strong>图片：</strong>格式、尺寸、多图命名、覆盖保护和原子写入。</li><li><strong>更新：</strong>镜像一致性、manifest、wheel 元数据、助手脚本与 uv 环境识别。</li><li><strong>网站：</strong>本地链接、资源、六个栏目、导航和关键公开内容。</li></ul><p>影响 CLI、打包、更新器或 Release 时，应运行完整测试、Ruff 与构建，而不是只跑单个测试文件。</p></section>
+      <section id="security"><h2>安全开发规则</h2><ul><li>测试和文档只使用明显假凭据。</li><li>不要读取、提交或输出真实 API Key、Token、Cookie、Authorization Header、CC-Switch 数据库或用户生成图片。</li><li>错误、对象 repr、代理显示与响应形状描述必须保持脱敏。</li><li>远程 API 和更新资产继续要求 HTTPS 与固定来源，不增加跳过摘要校验的参数。</li><li><code>--json</code> 只能输出可解析 JSON，不能混入提示、心跳或自动更新消息。</li></ul></section>
+      <section id="site"><h2>维护文档网站</h2><p>GitHub Pages 发布根目录是 <code>docs/</code>。项目首页使用 <code>styles.css</code> 与 <code>script.js</code>；六个文档栏目共享 <code>docs-page.css</code> 与 <code>docs-page.js</code>。页面保持纯静态、无构建步骤，并让所有本地链接在 Pages 子路径下可解析。</p><pre><code>uv run --frozen pytest tests/test_site.py</code></pre><p>涉及可见布局还应在桌面端与 390×844 移动视口中打开本地站点，检查控制台、导航、横向溢出和复制交互。</p></section>
+      <section id="release"><h2>版本与发布</h2><ol class="task-list"><li><strong>同步版本</strong><p><code>pyproject.toml</code> 与 <code>src/gpt_image_cli/__init__.py</code> 必须一致，并同步 <code>uv.lock</code>。</p></li><li><strong>构建并生成清单</strong><pre><code>uv build
+$wheel = Get-ChildItem ./dist/*.whl | Select-Object -First 1
+uv run --no-project python ./scripts/build_release_manifest.py $wheel.FullName</code></pre></li><li><strong>创建匹配标签</strong><p>版本 <code>X.Y.Z</code> 使用标签 <code>vX.Y.Z</code>。</p></li><li><strong>验证公开资产</strong><p>检查完整 CI 矩阵、GitHub Release wheel、<code>latest.json</code>、大小与 SHA-256；配置凭据时再验证 Gitee/GitCode 完全一致。</p></li></ol><div class="callout callout--danger"><strong>本地构建不等于发布成功</strong><p>只有匿名可下载的公开 Release 资产和完整 CI 结果都通过后，才能声明版本已经发布。</p></div></section>
+      <section id="contribute"><h2>提交贡献</h2><p>保留无关工作区改动，使用 <code>codex/&lt;description&gt;</code> 或聚焦功能分支；明确暂存属于当前任务的文件，不使用强制推送。提交信息简短描述实际结果。</p><p>更多仓库要求见 <a href="https://github.com/Lijinzh/gpt-image-2-cli/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>、<a href="https://github.com/Lijinzh/gpt-image-2-cli/blob/main/AGENTS.md">AGENTS.md</a> 与 <a href="https://github.com/Lijinzh/gpt-image-2-cli/blob/main/SECURITY.md">SECURITY.md</a>。</p></section>
+      <nav class="page-nav"><a href="../guides/"><span>← PREVIOUS</span><strong>Guides and Tutorials</strong></a><a href="../reference/"><span>NEXT →</span><strong>Reference</strong></a></nav>
+    </main>
+    <aside class="docs-toc"><p>ON THIS PAGE</p><nav><a href="#setup">开发环境</a><a href="#architecture">模块边界</a><a href="#workflow">实现改动</a><a href="#testing">测试策略</a><a href="#security">安全规则</a><a href="#site">文档网站</a><a href="#release">版本与发布</a><a href="#contribute">提交贡献</a></nav></aside>
+  </div>
+  <footer class="docs-footer">GPT-Image 2 CLI Documentation · MIT License · 文档以已验证的公开能力为准</footer>
+</body></html>

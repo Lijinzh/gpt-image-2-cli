@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050713">
+  <meta name="description" content="GPT-Image 2 CLI 日常使用：生成参数、文件输出、代理、JSON 与更新。">
+  <title>Using · GPT-Image 2 CLI Docs</title>
+  <link rel="canonical" href="https://lijinzh.github.io/gpt-image-2-cli/using/">
+  <link rel="icon" href="../assets/icons/pixel-space-operator.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../docs-page.css">
+  <script src="../docs-page.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="docs-header">
+    <a class="docs-brand" href="../"><img src="../assets/icons/pixel-space-operator.png" alt="" width="46" height="46"><span><strong>GPT-IMAGE 2 CLI</strong><small>DOCUMENTATION / 中文</small></span></a>
+    <label class="docs-search"><span hidden>筛选文档栏目</span><input type="search" placeholder="筛选文档栏目…" data-docs-search><kbd>/</kbd></label>
+    <nav class="docs-header__links" aria-label="辅助导航"><a href="../">项目首页</a><a href="https://github.com/Lijinzh/gpt-image-2-cli">GitHub</a></nav>
+    <button class="docs-menu" type="button" aria-expanded="false" data-docs-menu>文档目录</button>
+  </header>
+  <div class="docs-shell">
+    <aside class="docs-sidebar" data-docs-sidebar><p class="docs-sidebar__label">DOCUMENT MAP</p><nav class="doc-nav" aria-label="文档栏目">
+      <a href="../getting-started/"><strong>Getting Started</strong><small>安装与第一次生成</small></a>
+      <a href="../using/" aria-current="page"><strong>Using</strong><small>日常命令与工作流</small></a>
+      <a href="../features/"><strong>Features</strong><small>能力、可靠性与安全</small></a>
+      <a href="../guides/"><strong>Guides and Tutorials</strong><small>按任务学习</small></a>
+      <a href="../developer-guide/"><strong>Developer Guide</strong><small>开发、测试与发布</small></a>
+      <a href="../reference/"><strong>Reference</strong><small>命令、变量与退出码</small></a>
+    </nav><p class="docs-sidebar__meta">常用入口：<br><code>doctor</code><br><code>generate</code><br><code>update</code></p></aside>
+    <main class="docs-content" id="main-content">
+      <header class="docs-hero"><p class="docs-hero__path">DOCS / 02 / USING</p><h1>把 CLI 放进<br><em>日常工作流。</em></h1><p class="docs-hero__lead">从一条提示词到多图输出、尺寸控制、代理、脚本化 JSON 与更新管理。本页聚焦“怎样用”，参数的完整定义请查阅 Reference。</p><div class="docs-hero__actions"><a class="docs-button" href="#generate">生成图片</a><a class="docs-button docs-button--secondary" href="../reference/">查看完整参数</a></div></header>
+      <section id="command-model"><h2>三个命令，一条清晰路径</h2><div class="doc-grid"><article class="doc-card"><h3><code>doctor</code></h3><p>验证配置、代理、模型列表。不会提交图片生成请求。</p></article><article class="doc-card"><h3><code>generate</code></h3><p>提交一次图片请求，验证响应与像素尺寸，并安全保存文件。</p></article><article class="doc-card doc-card--wide"><h3><code>update</code></h3><p>从允许的公开 Release 渠道检查版本；只有通过来源、文件名、大小、SHA-256 和 wheel 元数据校验后，才会安排更新。</p></article></div></section>
+      <section id="generate"><h2>生成图片</h2><h3>基础命令</h3><pre><code>gpt-image generate "极简产品摄影，一台透明外壳的未来相机" \
+  --size 1024x1024 --quality high \
+  -o ./artifacts/camera.png</code></pre><h3>尺寸与别名</h3><div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>值</th><th>实际请求</th><th>适合内容</th></tr></thead><tbody><tr><td><code>square</code></td><td><code>1024x1024</code></td><td>头像、图标、方形封面</td></tr><tr><td><code>landscape</code></td><td><code>1536x1024</code></td><td>电影画面、网页横幅</td></tr><tr><td><code>portrait</code></td><td><code>1024x1536</code></td><td>海报、角色全身像</td></tr><tr><td><code>auto</code></td><td>不发送 size</td><td>让兼容 API 使用自身默认值</td></tr></tbody></table></div><p>显式指定尺寸时，服务端若返回不同画布，CLI 默认报错并且不写文件。确实希望得到精确画布时，主动加入 <code>--fit-output-size</code>，它会居中裁切并用 Lanczos 缩放为目标尺寸。</p><pre><code>gpt-image generate "竖版科幻电影海报，无文字" \
+  --size portrait --fit-output-size \
+  -o ./artifacts/poster.png</code></pre><div class="callout callout--warning"><strong>裁切是显式选择</strong><p><code>--fit-output-size</code> 可能移除图片边缘内容。默认严格拒绝不匹配画布，是为了避免悄悄改变构图。</p></div></section>
+      <section id="multiple"><h2>一次生成多张</h2><p><code>-n</code> 支持 1 到 10。输出为多张时，CLI 会在文件名后追加从 1 开始的序号。</p><pre><code>gpt-image generate "月球温室里的小型机器人" \
+  -n 3 --size landscape \
+  -o ./artifacts/moon-greenhouse.png</code></pre><p>结果路径为 <code>moon-greenhouse-1.png</code>、<code>moon-greenhouse-2.png</code> 与 <code>moon-greenhouse-3.png</code>。所有响应图片会先完成验证，默认也会先检查所有目标文件是否已存在。</p></section>
+      <section id="prompt-file"><h2>从文件读取长提示词</h2><p>复杂提示词可以保存在 UTF-8 文本文件中，避免 shell 引号和换行转义：</p><pre><code>gpt-image generate --prompt-file ./prompt.txt \
+  --size landscape --quality high \
+  -o ./artifacts/result.png</code></pre><p>位置参数提示词与 <code>--prompt-file</code> 不能同时使用，空文件也会被拒绝。</p></section>
+      <section id="outputs"><h2>安全管理输出</h2><ul><li><strong>自动扩展名：</strong>输出路径没有扩展名时，根据实际图片格式补充 <code>.png</code>、<code>.jpg</code>、<code>.webp</code> 或 <code>.gif</code>。</li><li><strong>原子写入：</strong>先在目标目录写临时文件、刷新到磁盘，再原子替换目标。</li><li><strong>默认不覆盖：</strong>已有文件会触发错误；只有明确加入 <code>--overwrite</code> 才覆盖。</li><li><strong>响应上限：</strong>默认拒绝超过 150 MB 的图片 API 响应，可用 <code>--max-response-mb</code> 调整。</li></ul></section>
+      <section id="proxy"><h2>代理与网络</h2><p>代理优先级是：显式 <code>--proxy</code> → <code>HTTP_PROXY</code> / <code>HTTPS_PROXY</code> / <code>ALL_PROXY</code> → 已启用的 Windows 系统代理 → 直连。</p><pre><code>gpt-image doctor --proxy http://127.0.0.1:7890
+gpt-image doctor --no-proxy</code></pre><p><code>--proxy</code> 与 <code>--no-proxy</code> 不能同时使用。代理 URL 中的用户名与密码不会出现在诊断输出，显示时仅保留协议、主机、端口和路径。</p><h3>超时与重连</h3><ul><li><code>--connect-timeout</code> 默认 30 秒。</li><li><code>--connect-retries</code> 默认 2，只重试请求尚未提交的连接建立失败。</li><li><code>--timeout</code> 默认 1800 秒，控制图片生成响应等待时间。</li><li><code>--download-timeout</code> 默认 300 秒，用于下载 URL 响应中的图片。</li></ul><div class="callout callout--danger"><strong>不会自动重试可能已计费的请求</strong><p>POST 已提交后出现读超时或连接中断，CLI 会提示可能已经计费，并停止自动重试。请先检查供应商后台，再决定是否手动重新生成。</p></div></section>
+      <section id="json"><h2>脚本与 JSON 输出</h2><p><code>doctor</code>、<code>generate</code> 和 <code>update</code> 都支持 <code>--json</code>。JSON 模式不会混入等待心跳或自动更新提示，适合 CI 和脚本解析。</p><pre><code>gpt-image generate "blue glass sculpture" \
+  --size square -o ./artifacts/sculpture.png \
+  --dry-run --json</code></pre><p>生成成功时，<code>images</code> 数组包含绝对路径、宽高、格式、字节数和响应来源。不要依赖非 JSON 模式的缩进展示来编写解析器。</p></section>
+      <section id="updates"><h2>检查与安装更新</h2><pre><code>gpt-image update --check
+gpt-image update --check --json
+gpt-image update</code></pre><p>交互式 <code>doctor</code> 或 <code>generate</code> 成功后，CLI 最多每 24 小时低频检查一次正式 Release。发现可信新版本时，它会下载并验证 wheel，然后让独立助手在当前命令退出后运行 <code>uv tool install --force</code>。</p><p>如果不希望自动检查：</p><pre><code># PowerShell
+$env:GPT_IMAGE_DISABLE_UPDATE_CHECK = "1"
+
+# Bash / Zsh
+export GPT_IMAGE_DISABLE_UPDATE_CHECK=1</code></pre><p>非 <code>uv tool</code> 安装不会被擅自替换；此时应通过最初安装它的包管理器更新。</p></section>
+      <nav class="page-nav" aria-label="相邻文档"><a href="../getting-started/"><span>← PREVIOUS</span><strong>Getting Started</strong></a><a href="../features/"><span>NEXT →</span><strong>Features</strong></a></nav>
+    </main>
+    <aside class="docs-toc"><p>ON THIS PAGE</p><nav aria-label="本页目录"><a href="#command-model">命令模型</a><a href="#generate">生成图片</a><a href="#multiple">一次生成多张</a><a href="#prompt-file">长提示词文件</a><a href="#outputs">安全管理输出</a><a href="#proxy">代理与网络</a><a href="#json">JSON 输出</a><a href="#updates">更新</a></nav></aside>
+  </div>
+  <footer class="docs-footer">GPT-Image 2 CLI Documentation · MIT License · 文档以已验证的公开能力为准</footer>
+</body>
+</html>

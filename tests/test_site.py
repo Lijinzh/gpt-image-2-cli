@@ -7,6 +7,14 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
+DOC_SECTIONS = {
+    "getting-started": "GETTING STARTED",
+    "using": "USING",
+    "features": "FEATURES",
+    "guides": "GUIDES AND TUTORIALS",
+    "developer-guide": "DEVELOPER GUIDE",
+    "reference": "REFERENCE",
+}
 
 
 class SiteParser(HTMLParser):
@@ -57,7 +65,9 @@ def test_site_has_required_public_content() -> None:
 
 
 def test_site_local_links_and_assets_resolve() -> None:
-    for page in (DOCS / "index.html", DOCS / "en" / "index.html"):
+    pages = [DOCS / "index.html", DOCS / "en" / "index.html"]
+    pages.extend(DOCS / section / "index.html" for section in DOC_SECTIONS)
+    for page in pages:
         parser = parse_site(page)
         for reference in parser.references:
             parsed = urlparse(reference)
@@ -70,6 +80,30 @@ def test_site_local_links_and_assets_resolve() -> None:
             if path:
                 target = (page.parent / path).resolve()
                 assert target.is_file() or (target / "index.html").is_file(), reference
+
+
+def test_documentation_portal_has_all_sections() -> None:
+    for section, marker in DOC_SECTIONS.items():
+        page = DOCS / section / "index.html"
+        html = page.read_text(encoding="utf-8")
+        content = " ".join(parse_site(page).text)
+        assert marker in content
+        assert 'href="../docs-page.css"' in html
+        assert 'src="../docs-page.js"' in html
+        assert html.count('class="doc-nav"') == 1
+        for expected_section in DOC_SECTIONS:
+            assert f'href="../{expected_section}/"' in html
+    assert (DOCS / "docs-page.css").is_file()
+    assert (DOCS / "docs-page.js").is_file()
+
+
+def test_homepages_link_to_documentation() -> None:
+    chinese = (DOCS / "index.html").read_text(encoding="utf-8")
+    english = (DOCS / "en" / "index.html").read_text(encoding="utf-8")
+    assert 'href="getting-started/">文档</a>' in chinese
+    assert 'href="getting-started/">阅读完整文档</a>' in chinese
+    assert 'href="../getting-started/">Docs</a>' in english
+    assert 'href="../getting-started/">Read full docs</a>' in english
 
 
 def test_english_site_is_complete_and_switchable() -> None:

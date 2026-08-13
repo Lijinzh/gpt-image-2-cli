@@ -2,6 +2,8 @@
 
 🌃 **项目网页：** [lijinzh.github.io/gpt-image-2-cli](https://lijinzh.github.io/gpt-image-2-cli/) · 安装步骤、交互式命令生成器与示例画廊
 
+📚 **完整文档：** [Getting Started](https://lijinzh.github.io/gpt-image-2-cli/getting-started/) · [Using](https://lijinzh.github.io/gpt-image-2-cli/using/) · [Features](https://lijinzh.github.io/gpt-image-2-cli/features/) · [Guides and Tutorials](https://lijinzh.github.io/gpt-image-2-cli/guides/) · [Developer Guide](https://lijinzh.github.io/gpt-image-2-cli/developer-guide/) · [Reference](https://lijinzh.github.io/gpt-image-2-cli/reference/)
+
 > [!TIP]
 > **复制下面这一句话给 Codex，即可自动安装和安全配置：**
 

@@ -80,7 +80,7 @@ gpt-image generate "Star Wars 宇宙中的 16-bit 像素艺术场景：Luke Skyw
 管理，并安全替换整个隔离环境：
 
 ```powershell
-uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.2/gpt_image_2_cli-0.2.2-py3-none-any.whl"
+uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.3/gpt_image_2_cli-0.2.3-py3-none-any.whl"
 gpt-image --version
 ```
 

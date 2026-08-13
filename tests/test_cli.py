@@ -4,6 +4,7 @@ import json
 import signal
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 from packaging.version import Version
@@ -209,6 +210,56 @@ def test_sigterm_after_submission_reports_billing_risk_without_output(
         "automatic_retry": False,
     }
     assert "request_submitted=true possibly_billed=true automatic_retry=false" in captured.err
+    assert "must-never-be-printed" not in captured.out
+    assert "must-never-be-printed" not in captured.err
+
+
+def test_sigterm_handler_defers_exception_until_safe_poll_point(
+    monkeypatch: object,
+    capsys: object,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("GPT_IMAGE_API_BASE", "https://relay.example/v1")
+    monkeypatch.setenv("GPT_IMAGE_API_KEY", "must-never-be-printed")
+    output = tmp_path / "must-not-exist.png"
+    original_start = threading.Thread.start
+    start_returned = False
+
+    def interrupted_start(thread: threading.Thread) -> None:
+        nonlocal start_returned
+        signal.raise_signal(signal.SIGTERM)
+        start_returned = True
+        original_start(thread)
+
+    monkeypatch.setattr("gpt_image_cli.cli.ImageClient.generate", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(threading.Thread, "start", interrupted_start)
+    exit_code = main(
+        [
+            "generate",
+            "interrupt during thread start",
+            "--output",
+            str(output),
+            "--jsonl-progress",
+            "--no-progress",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    json_lines = [
+        json.loads(line)
+        for line in captured.err.splitlines()
+        if line.startswith("{")
+    ]
+    assert start_returned is True
+    assert exit_code == 128 + signal.SIGTERM
+    assert output.exists() is False
+    assert json_lines[-1] == {
+        "event": "interrupted",
+        "signal": "SIGTERM",
+        "request_submitted": False,
+        "possibly_billed": False,
+        "automatic_retry": False,
+    }
     assert "must-never-be-printed" not in captured.out
     assert "must-never-be-printed" not in captured.err
 

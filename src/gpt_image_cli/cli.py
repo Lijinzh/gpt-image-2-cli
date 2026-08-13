@@ -7,6 +7,7 @@ import queue
 import signal
 import sys
 import threading
+import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -31,6 +32,33 @@ from .updater import automatic_update_notice, check_for_updates, install_update
 DEFAULT_CC_SWITCH_DB = Path.home() / ".cc-switch" / "cc-switch.db"
 DEFAULT_MODEL = os.getenv("GPT_IMAGE_MODEL", "gpt-image-2")
 ResultT = TypeVar("ResultT")
+
+
+class _PendingGenerationInterrupt:
+    """Record signals without raising inside interpreter or threading internals."""
+
+    def __init__(self) -> None:
+        self.signal_name: str | None = None
+        self.exit_code = 130
+
+    def record(self, signum: int) -> None:
+        if self.signal_name is not None:
+            return
+        if signum == getattr(signal, "SIGINT", None):
+            self.signal_name = "KeyboardInterrupt"
+            self.exit_code = 130
+            return
+        self.signal_name = signal.Signals(signum).name
+        self.exit_code = 128 + signum
+
+    def raise_if_requested(self, state: GenerationRequestState) -> None:
+        if self.signal_name is None:
+            return
+        raise GenerationInterrupted(
+            self.signal_name,
+            request_submitted=state.request_submitted,
+            exit_code=self.exit_code,
+        )
 
 
 def _add_connection_arguments(parser: argparse.ArgumentParser) -> None:
@@ -183,25 +211,24 @@ def _emit_progress(enabled: bool, event: str, **details: Any) -> None:
 
 
 @contextmanager
-def _generation_interrupts(state: GenerationRequestState) -> Iterator[None]:
+def _generation_interrupts(
+    state: GenerationRequestState,
+) -> Iterator[_PendingGenerationInterrupt]:
     previous: dict[int, Any] = {}
+    pending = _PendingGenerationInterrupt()
 
     def interrupt(signum: int, _frame: FrameType | None) -> None:
-        name = signal.Signals(signum).name
-        raise GenerationInterrupted(
-            name,
-            request_submitted=state.request_submitted,
-            exit_code=128 + signum,
-        )
+        pending.record(signum)
 
-    for name in ("SIGTERM", "SIGHUP", "SIGBREAK"):
+    for name in ("SIGINT", "SIGTERM", "SIGHUP", "SIGBREAK"):
         signum = getattr(signal, name, None)
         if signum is None:
             continue
         previous[signum] = signal.getsignal(signum)
         signal.signal(signum, interrupt)
     try:
-        yield
+        yield pending
+        pending.raise_if_requested(state)
     except KeyboardInterrupt as exc:
         raise GenerationInterrupted(
             "KeyboardInterrupt",
@@ -212,7 +239,12 @@ def _generation_interrupts(state: GenerationRequestState) -> Iterator[None]:
             signal.signal(signum, handler)
 
 
-def _run_interruptibly(action: Callable[[], ResultT]) -> ResultT:
+def _run_interruptibly(
+    action: Callable[[], ResultT],
+    *,
+    pending: _PendingGenerationInterrupt,
+    state: GenerationRequestState,
+) -> ResultT:
     """Keep the main thread available for signals during blocking network I/O."""
 
     results: queue.Queue[tuple[bool, ResultT | BaseException]] = queue.Queue(maxsize=1)
@@ -226,11 +258,13 @@ def _run_interruptibly(action: Callable[[], ResultT]) -> ResultT:
     thread = threading.Thread(target=run, name="gpt-image-request", daemon=True)
     thread.start()
     while True:
+        pending.raise_if_requested(state)
         try:
-            succeeded, value = results.get(timeout=0.1)
+            succeeded, value = results.get_nowait()
             break
         except queue.Empty:
-            continue
+            time.sleep(0.05)
+    pending.raise_if_requested(state)
     if not succeeded:
         assert isinstance(value, BaseException)
         raise value
@@ -360,7 +394,7 @@ def _generate(args: argparse.Namespace) -> int:
             flush=True,
         )
     try:
-        with _generation_interrupts(request_state):
+        with _generation_interrupts(request_state) as pending_interrupt:
             result = _run_interruptibly(
                 lambda: client.generate(
                     options,
@@ -368,8 +402,11 @@ def _generate(args: argparse.Namespace) -> int:
                     progress_callback=progress if args.jsonl_progress else None,
                     request_state=request_state,
                     emit_progress_heartbeats=not args.no_progress,
-                )
+                ),
+                pending=pending_interrupt,
+                state=request_state,
             )
+            pending_interrupt.raise_if_requested(request_state)
             expected_size = None
             if options.normalized_size() != "auto":
                 expected_size = tuple(

@@ -27,14 +27,14 @@
       <a href="../guides/"><strong>Guides and Tutorials</strong><small>按任务学习</small></a>
       <a href="../developer-guide/"><strong>Developer Guide</strong><small>开发、测试与发布</small></a>
       <a href="../reference/"><strong>Reference</strong><small>命令、变量与退出码</small></a>
-    </nav><p class="docs-sidebar__meta">当前稳定版：<strong>0.2.3</strong><br>运行环境：Python 3.11+<br>平台：Linux / macOS / Windows</p></aside>
+    </nav><p class="docs-sidebar__meta">当前稳定版：<strong>0.2.4</strong><br>运行环境：Python 3.11+<br>平台：Linux / macOS / Windows</p></aside>
 
     <main class="docs-content" id="main-content">
       <header class="docs-hero"><p class="docs-hero__path">DOCS / 01 / GETTING STARTED</p><h1>从安装到<br><em>第一张图。</em></h1><p class="docs-hero__lead">这条路径适合第一次接触本工具的使用者。完成后，你会拥有一个由 <code>uv tool</code> 管理、能够安全读取本机配置并支持自动更新的跨平台 CLI。</p><div class="docs-hero__actions"><a class="docs-button" href="#install">开始安装</a><a class="docs-button docs-button--secondary" href="../using/">已经安装？进入 Using</a></div></header>
 
       <section id="requirements"><h2>准备环境</h2><p>GPT-Image 2 CLI 支持 Linux、macOS 与 Windows，需要 Python 3.11+ 和 <a href="https://docs.astral.sh/uv/">uv</a>。推荐使用 <code>uv tool</code>，因为它会为 CLI 创建独立环境，也是内置安全自更新能够识别和维护的安装方式。</p><div class="doc-grid"><article class="doc-card"><h3>检查 Python</h3><pre><code>python --version</code></pre><p>版本应为 3.11 或更高。uv 也可以管理所需的 Python 运行时。</p></article><article class="doc-card"><h3>检查 uv</h3><pre><code>uv --version</code></pre><p>如果命令不存在，请先按 uv 官方安装文档完成安装。</p></article></div></section>
 
-      <section id="install"><h2>安装正式 Release</h2><p>正式用户推荐从 GitHub Release 的通用 wheel 安装。wheel 固定到明确版本，便于验证来源，也能让内置更新器确认当前环境由 <code>uv tool</code> 管理。</p><pre><code>uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.3/gpt_image_2_cli-0.2.3-py3-none-any.whl"
+      <section id="install"><h2>安装正式 Release</h2><p>正式用户推荐从 GitHub Release 的通用 wheel 安装。wheel 固定到明确版本，便于验证来源，也能让内置更新器确认当前环境由 <code>uv tool</code> 管理。</p><pre><code>uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.4/gpt_image_2_cli-0.2.4-py3-none-any.whl"
 gpt-image --version</code></pre><p>如果安装成功但终端找不到命令，运行以下命令，然后重新打开终端：</p><pre><code>uv tool update-shell</code></pre><div class="callout"><strong>跨平台提示</strong><p>上面的 <code>uv tool install</code> 命令在 PowerShell、Bash 与 Zsh 中完全相同，不要求管理员权限或 <code>sudo</code>。</p></div><h3>源码版安装</h3><p>需要跟踪 <code>main</code> 最新代码时，也可以从 Git 安装；正式使用仍建议优先采用 Release wheel。</p><pre><code>uv tool install "git+https://github.com/Lijinzh/gpt-image-2-cli.git"</code></pre></section>
 
       <section id="configure"><h2>选择配置来源</h2><h3>方式 A：读取 CC-Switch</h3><p>如果当前用户已使用 CC-Switch 配置 Codex 供应商，CLI 默认只读打开 <code>~/.cc-switch/cc-switch.db</code>，解析当前 Codex 供应商。API Key 不会被复制到项目、终端输出或生成图片。</p><pre><code>gpt-image doctor</code></pre><h3>方式 B：环境变量</h3><p>Linux、CI 或不使用 CC-Switch 的用户，可以直接提供 OpenAI 兼容 API 地址与 Key。为了避免密钥进入 shell 历史，CLI 故意不提供 <code>--api-key</code> 参数。</p><div class="doc-grid"><article class="doc-card"><h3>PowerShell</h3><pre><code>$env:GPT_IMAGE_API_BASE = "https://relay.example/v1"

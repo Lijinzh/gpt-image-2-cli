@@ -4,8 +4,10 @@ import json
 import sys
 import threading
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass, field
+from typing import Any
 
 import httpx
 
@@ -22,11 +24,36 @@ from .responses import (
 )
 
 USER_AGENT = f"gpt-image-2-cli/{__version__}"
+ProgressCallback = Callable[[str, dict[str, Any]], None]
+
+
+@dataclass(slots=True)
+class GenerationRequestState:
+    """Thread-safe evidence about whether the paid POST body was sent."""
+
+    _submitted: threading.Event = field(default_factory=threading.Event)
+    _lock: threading.Lock = field(default_factory=threading.Lock)
+
+    @property
+    def request_submitted(self) -> bool:
+        return self._submitted.is_set()
+
+    def mark_submitted(self) -> bool:
+        with self._lock:
+            if self._submitted.is_set():
+                return False
+            self._submitted.set()
+            return True
 
 
 @contextmanager
-def progress_heartbeat(enabled: bool, interval: float = 15.0) -> Iterator[None]:
-    if not enabled:
+def progress_heartbeat(
+    enabled: bool,
+    interval: float = 15.0,
+    *,
+    callback: ProgressCallback | None = None,
+) -> Iterator[None]:
+    if not enabled and callback is None:
         yield
         return
     stop = threading.Event()
@@ -35,7 +62,14 @@ def progress_heartbeat(enabled: bool, interval: float = 15.0) -> Iterator[None]:
     def report() -> None:
         while not stop.wait(interval):
             elapsed = int(time.monotonic() - started)
-            print(f"Still waiting for the image API... {elapsed}s", file=sys.stderr, flush=True)
+            if enabled:
+                print(
+                    f"Still waiting for the image API... {elapsed}s",
+                    file=sys.stderr,
+                    flush=True,
+                )
+            if callback is not None:
+                callback("heartbeat", {"elapsed_seconds": elapsed})
 
     thread = threading.Thread(target=report, name="gpt-image-progress", daemon=True)
     thread.start()
@@ -157,7 +191,14 @@ class ImageClient:
         return sorted(set(models))
 
     def generate(
-        self, options: GenerationOptions, *, show_progress: bool = True
+        self,
+        options: GenerationOptions,
+        *,
+        show_progress: bool = True,
+        progress_callback: ProgressCallback | None = None,
+        request_state: GenerationRequestState | None = None,
+        progress_interval: float = 15.0,
+        emit_progress_heartbeats: bool = True,
     ) -> GenerationResult:
         payload = options.payload()
         timeout = httpx.Timeout(
@@ -167,7 +208,23 @@ class ImageClient:
             pool=30,
         )
         started = time.monotonic()
-        request_attempted = False
+        state = request_state or GenerationRequestState()
+
+        def emit(event: str, **details: Any) -> None:
+            if progress_callback is not None:
+                progress_callback(event, details)
+
+        def mark_submitted() -> None:
+            if state.mark_submitted():
+                emit(
+                    "request_submitted",
+                    elapsed_seconds=round(time.monotonic() - started, 2),
+                )
+
+        def trace(event_name: str, _info: dict[str, Any]) -> None:
+            if event_name.endswith(".send_request_body.complete"):
+                mark_submitted()
+
         try:
             for attempt in range(self.connect_retries + 1):
                 try:
@@ -176,13 +233,20 @@ class ImageClient:
                         follow_redirects=True,
                         trust_env=self.trust_env,
                         proxy=self.proxy,
-                    ) as client, progress_heartbeat(show_progress), client.stream(
+                    ) as client, progress_heartbeat(
+                        show_progress,
+                        progress_interval,
+                        callback=progress_callback if emit_progress_heartbeats else None,
+                    ), client.stream(
                         "POST",
                         self.config.images_endpoint,
                         headers=self._headers(),
                         json=payload,
+                        extensions={"trace": trace},
                     ) as response:
-                        request_attempted = True
+                        # Receiving headers proves that the request reached the server even
+                        # if a custom transport did not expose the httpcore trace extension.
+                        mark_submitted()
                         body = self._read_limited(response)
                         request_id = response.headers.get(
                             "x-request-id"
@@ -195,15 +259,31 @@ class ImageClient:
                             )
                         content_type = response.headers.get("content-type", "").lower()
                     break
-                except (httpx.ConnectError, httpx.ConnectTimeout):
+                except (httpx.ConnectError, httpx.ConnectTimeout) as exc:
+                    if state.request_submitted:
+                        raise GenerationError(
+                            "The connection ended after the image request was submitted. "
+                            "It will not be retried automatically. "
+                            f"Details: {redact(str(exc), self.config.api_key)}",
+                            possibly_billed=True,
+                        ) from exc
                     if attempt >= self.connect_retries:
                         raise
-                    print(
-                        "Connection setup failed; retrying "
-                        f"({attempt + 1}/{self.connect_retries})...",
-                        file=sys.stderr,
-                        flush=True,
+                    emit(
+                        "connection_retry",
+                        attempt=attempt + 1,
+                        maximum_retries=self.connect_retries,
+                        request_submitted=False,
+                        possibly_billed=False,
+                        automatic_retry=True,
                     )
+                    if show_progress:
+                        print(
+                            "Connection setup failed; retrying "
+                            f"({attempt + 1}/{self.connect_retries})...",
+                            file=sys.stderr,
+                            flush=True,
+                        )
         except GenerationError:
             raise
         except (httpx.ConnectError, httpx.ConnectTimeout) as exc:
@@ -216,12 +296,12 @@ class ImageClient:
                 "The request may already have been processed, so the CLI will not "
                 "retry automatically. "
                 f"Details: {redact(str(exc), self.config.api_key)}",
-                possibly_billed=request_attempted,
+                possibly_billed=state.request_submitted,
             ) from exc
         except httpx.HTTPError as exc:
             raise GenerationError(
                 f"Image API request failed: {redact(str(exc), self.config.api_key)}",
-                possibly_billed=request_attempted,
+                possibly_billed=state.request_submitted,
             ) from exc
 
         if content_type.startswith("image/"):

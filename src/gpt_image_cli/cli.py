@@ -3,14 +3,20 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import queue
+import signal
 import sys
+import threading
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from types import FrameType
+from typing import Any, TypeVar
 
 from . import __version__
-from .client import ImageClient
+from .client import GenerationRequestState, ImageClient
 from .config import ApiConfig, resolve_api_config
-from .errors import CliError, GenerationError
+from .errors import CliError, GenerationError, GenerationInterrupted
 from .image_io import save_images
 from .models import (
     SIZE_ALIASES,
@@ -24,6 +30,7 @@ from .updater import automatic_update_notice, check_for_updates, install_update
 
 DEFAULT_CC_SWITCH_DB = Path.home() / ".cc-switch" / "cc-switch.db"
 DEFAULT_MODEL = os.getenv("GPT_IMAGE_MODEL", "gpt-image-2")
+ResultT = TypeVar("ResultT")
 
 
 def _add_connection_arguments(parser: argparse.ArgumentParser) -> None:
@@ -120,6 +127,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Resolve configuration and validate parameters without a paid API request.",
     )
     generate.add_argument("--no-progress", action="store_true", help="Disable waiting heartbeats.")
+    generate.add_argument(
+        "--jsonl-progress",
+        action="store_true",
+        help="Emit redacted JSON Lines progress events to stderr.",
+    )
     generate.add_argument("--json", action="store_true", help="Emit machine-readable JSON only.")
 
     update = subparsers.add_parser(
@@ -158,6 +170,71 @@ def _emit(payload: dict[str, Any], *, json_only: bool) -> None:
         print(json.dumps(payload, ensure_ascii=False))
         return
     print(json.dumps(payload, ensure_ascii=False, indent=2))
+
+
+def _emit_progress(enabled: bool, event: str, **details: Any) -> None:
+    if not enabled:
+        return
+    print(
+        json.dumps({"event": event, **details}, ensure_ascii=False, separators=(",", ":")),
+        file=sys.stderr,
+        flush=True,
+    )
+
+
+@contextmanager
+def _generation_interrupts(state: GenerationRequestState) -> Iterator[None]:
+    previous: dict[int, Any] = {}
+
+    def interrupt(signum: int, _frame: FrameType | None) -> None:
+        name = signal.Signals(signum).name
+        raise GenerationInterrupted(
+            name,
+            request_submitted=state.request_submitted,
+            exit_code=128 + signum,
+        )
+
+    for name in ("SIGTERM", "SIGHUP", "SIGBREAK"):
+        signum = getattr(signal, name, None)
+        if signum is None:
+            continue
+        previous[signum] = signal.getsignal(signum)
+        signal.signal(signum, interrupt)
+    try:
+        yield
+    except KeyboardInterrupt as exc:
+        raise GenerationInterrupted(
+            "KeyboardInterrupt",
+            request_submitted=state.request_submitted,
+        ) from exc
+    finally:
+        for signum, handler in previous.items():
+            signal.signal(signum, handler)
+
+
+def _run_interruptibly(action: Callable[[], ResultT]) -> ResultT:
+    """Keep the main thread available for signals during blocking network I/O."""
+
+    results: queue.Queue[tuple[bool, ResultT | BaseException]] = queue.Queue(maxsize=1)
+
+    def run() -> None:
+        try:
+            results.put((True, action()))
+        except BaseException as exc:
+            results.put((False, exc))
+
+    thread = threading.Thread(target=run, name="gpt-image-request", daemon=True)
+    thread.start()
+    while True:
+        try:
+            succeeded, value = results.get(timeout=0.1)
+            break
+        except queue.Empty:
+            continue
+    if not succeeded:
+        assert isinstance(value, BaseException)
+        raise value
+    return value
 
 
 def _read_prompt(args: argparse.Namespace) -> str:
@@ -251,6 +328,30 @@ def _generate(args: argparse.Namespace) -> int:
         _emit({**base_summary, "dry_run": True, "success": True}, json_only=args.json)
         return 0
 
+    request_state = GenerationRequestState()
+    _emit_progress(
+        args.jsonl_progress,
+        "request_started",
+        model=args.model,
+        size=options.normalized_size(),
+        image_count=args.n,
+        request_submitted=False,
+        possibly_billed=False,
+    )
+
+    def progress(event: str, details: dict[str, Any]) -> None:
+        submitted = details.pop("request_submitted", request_state.request_submitted)
+        possibly_billed = details.pop("possibly_billed", submitted)
+        automatic_retry = details.pop("automatic_retry", False)
+        _emit_progress(
+            args.jsonl_progress,
+            event,
+            request_submitted=submitted,
+            possibly_billed=possibly_billed,
+            automatic_retry=automatic_retry,
+            **details,
+        )
+
     if not args.json:
         print(
             f"Submitting {args.model} request to {config.provider}; "
@@ -258,19 +359,51 @@ def _generate(args: argparse.Namespace) -> int:
             file=sys.stderr,
             flush=True,
         )
-    result = client.generate(options, show_progress=not args.no_progress and not args.json)
-    expected_size = None
-    if options.normalized_size() != "auto":
-        expected_size = tuple(
-            int(part) for part in options.normalized_size().split("x", maxsplit=1)
+    try:
+        with _generation_interrupts(request_state):
+            result = _run_interruptibly(
+                lambda: client.generate(
+                    options,
+                    show_progress=not args.no_progress and not args.json,
+                    progress_callback=progress if args.jsonl_progress else None,
+                    request_state=request_state,
+                    emit_progress_heartbeats=not args.no_progress,
+                )
+            )
+            expected_size = None
+            if options.normalized_size() != "auto":
+                expected_size = tuple(
+                    int(part) for part in options.normalized_size().split("x", maxsplit=1)
+                )
+            saved = save_images(
+                args.output,
+                result.images,
+                overwrite=args.overwrite,
+                expected_size=expected_size,
+                fit_output_size=args.fit_output_size,
+            )
+    except GenerationInterrupted as exc:
+        _emit_progress(
+            args.jsonl_progress,
+            "interrupted",
+            signal=exc.signal_name,
+            request_submitted=exc.request_submitted,
+            possibly_billed=exc.possibly_billed,
+            automatic_retry=exc.automatic_retry,
         )
-    saved = save_images(
-        args.output,
-        result.images,
-        overwrite=args.overwrite,
-        expected_size=expected_size,
-        fit_output_size=args.fit_output_size,
-    )
+        raise
+    except CliError as exc:
+        if request_state.request_submitted:
+            exc.possibly_billed = True
+        _emit_progress(
+            args.jsonl_progress,
+            "failed",
+            error_type=exc.label.lower().replace(" ", "_"),
+            request_submitted=request_state.request_submitted,
+            possibly_billed=exc.possibly_billed,
+            automatic_retry=False,
+        )
+        raise
     payload = {
         **base_summary,
         "success": True,
@@ -289,6 +422,15 @@ def _generate(args: argparse.Namespace) -> int:
             for item in saved
         ],
     }
+    _emit_progress(
+        args.jsonl_progress,
+        "completed",
+        elapsed_seconds=round(result.elapsed_seconds, 2),
+        image_count=len(saved),
+        request_submitted=request_state.request_submitted,
+        possibly_billed=False,
+        automatic_retry=False,
+    )
     _emit(payload, json_only=args.json)
     return 0
 
@@ -352,6 +494,14 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("Unknown command.")
     except CliError as exc:
         print(f"{exc.label}: {exc}", file=sys.stderr)
+        if isinstance(exc, GenerationInterrupted):
+            print(
+                "Interruption state: "
+                f"request_submitted={str(exc.request_submitted).lower()} "
+                f"possibly_billed={str(exc.possibly_billed).lower()} "
+                f"automatic_retry={str(exc.automatic_retry).lower()}",
+                file=sys.stderr,
+            )
         if exc.possibly_billed:
             print(
                 "The request may already have been billed. It was not retried automatically.",

@@ -64,6 +64,8 @@ gpt-image generate "Star Wars 宇宙中的 16-bit 像素艺术场景：Luke Skyw
 - 生成完成后用 Pillow 验证文件格式和实际像素尺寸，再原子写入目标文件。
 - 显式指定尺寸时默认严格拒绝不匹配画布；可用 `--fit-output-size` 主动选择居中裁切并缩放。
 - 大图请求默认允许等待 30 分钟，并在等待期间输出心跳。
+- 可用 `--jsonl-progress` 将 `request_started`、`request_submitted`、`heartbeat`、
+  `completed` / `failed` / `interrupted` 脱敏事件写入 stderr，便于长任务调用方持续跟踪。
 - 读超时或连接中断后不会自动重试，因为服务端可能已经生成并计费。
 - 仅在请求尚未提交的连接建立失败时有限重连；不会重试可能已计费的请求。
 - 自动使用显式 `--proxy`、代理环境变量或启用的 Windows 系统代理；可用 `--no-proxy` 禁用。
@@ -231,6 +233,24 @@ gpt-image doctor
 
 如果 POST 请求已经到达服务端后发生读超时，CLI 会明确提示“可能已经计费”，且不会自动
 再次提交。确认供应商后台没有生成记录后，再由使用者决定是否重试。
+
+长任务调用方还必须区分“执行工具暂时 yield”和“CLI 进程已经退出”。如果上层执行器返回
+后台 `session_id` 或等价句柄，应持续轮询直到取得最终退出码；不能因为首次 30 秒没有退出就
+重新运行生成命令。CLI 的 `--timeout` 默认是 1800 秒，工具层的 yield 不等于 API ReadTimeout。
+
+需要机器可读进度时，可以同时使用最终 JSON 与 JSON Lines 进度：
+
+```powershell
+gpt-image generate "一辆未来感电动跑车，摄影棚产品照" `
+  --size landscape --quality high -o .\artifacts\car.png `
+  --json --jsonl-progress
+```
+
+最终结果仍单独写入 stdout；进度事件写入 stderr。请求体发送完成后，事件会包含
+`request_submitted=true`、`possibly_billed=true`、`automatic_retry=false`。收到 Unix
+`SIGTERM` / `SIGHUP`、Windows Ctrl+Break（`SIGBREAK`）或 Ctrl+C / `KeyboardInterrupt`
+时，也会输出相同的脱敏中断状态。强制终止（例如 `SIGKILL`、任务管理器结束进程或
+`TerminateProcess`）无法保证最后一条提示能够输出。
 
 部分兼容中转会在 HTTP 200 响应中包裹 `error` 对象，或忽略请求画布。CLI 会将前者按真实
 错误显示，将后者在文件写入前拒绝；两种情况都不会伪装成生成成功。

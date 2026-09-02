@@ -80,7 +80,7 @@ gpt-image generate "Star Wars 宇宙中的 16-bit 像素艺术场景：Luke Skyw
 管理，并安全替换整个隔离环境：
 
 ```powershell
-uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.4/gpt_image_2_cli-0.2.4-py3-none-any.whl"
+uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.5/gpt_image_2_cli-0.2.5-py3-none-any.whl"
 gpt-image --version
 ```
 
@@ -236,7 +236,8 @@ gpt-image doctor
 
 长任务调用方还必须区分“执行工具暂时 yield”和“CLI 进程已经退出”。如果上层执行器返回
 后台 `session_id` 或等价句柄，应持续轮询直到取得最终退出码；不能因为首次 30 秒没有退出就
-重新运行生成命令。CLI 的 `--timeout` 默认是 1800 秒，工具层的 yield 不等于 API ReadTimeout。
+重新运行生成命令。CLI 的 `--timeout` 默认是 1800 秒；特别复杂或耗时不可预测的图片可以使用
+`--timeout 0` 取消读取阶段的时限。工具层的 yield 不等于 API ReadTimeout。
 
 需要机器可读进度时，可以同时使用最终 JSON 与 JSON Lines 进度：
 
@@ -267,6 +268,12 @@ gpt-image generate "一辆未来感电动跑车，摄影棚产品照" `
   `message.images[].image_url.url` 结构，并在下载完成后统一验证。
 
 本项目是独立的 Python 实现，没有复制 Cherry Studio 的大段源码。
+
+Cherry Studio 的稳定性还来自统一的网络出口：其图像请求经 Electron `net.fetch` 发出，并由
+全局代理服务把系统或自定义代理应用到 Electron 会话及 Node 网络栈。本 CLI 使用 `httpx`，
+并通过 `--proxy`、代理环境变量或 Windows 系统代理实现等价的代理感知；旧版 Skill 中直接使用
+`urllib` 的独立请求实现已经废弃，避免同一台机器上出现 Cherry Studio 可用而旧脚本走另一条
+网络路径的情况。
 
 ## 项目结构
 

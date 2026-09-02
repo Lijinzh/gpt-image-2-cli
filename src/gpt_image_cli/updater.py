@@ -595,14 +595,19 @@ def _write_update_helper(uv: str, wheel: Path, candidate: ReleaseCandidate) -> P
     suffix = f"{candidate.version}-{os.getpid()}"
     result_path = work_dir / f"result-{suffix}.json"
     log_path = work_dir / f"install-{suffix}.log"
+    started_path = work_dir / f"started-{suffix}.json"
     uv_text = _quote_powershell(uv)
     wheel_text = _quote_powershell(str(wheel))
     log_text = _quote_powershell(str(log_path))
     result_text = _quote_powershell(str(result_path))
+    started_text = _quote_powershell(str(started_path))
     version_text = _quote_powershell(str(candidate.version))
     if sys.platform == "win32":
         helper = work_dir / f"install-{suffix}.ps1"
         content = f"""$ErrorActionPreference = 'SilentlyContinue'
+@{{status='started'; version={version_text}}} |
+    ConvertTo-Json -Compress |
+    Set-Content -LiteralPath {started_text} -Encoding UTF8
 try {{ Wait-Process -Id {os.getpid()} -ErrorAction SilentlyContinue }} catch {{}}
 Start-Sleep -Milliseconds 750
 $env:UV_NO_PROGRESS = '1'
@@ -622,8 +627,10 @@ exit $code
         wheel_shell = shlex.quote(str(wheel))
         log_shell = shlex.quote(str(log_path))
         result_shell = shlex.quote(str(result_path))
+        started_shell = shlex.quote(str(started_path))
         version_shell = shlex.quote(str(candidate.version))
         content = f"""#!/bin/sh
+printf '{{"status":"started","version":"%s"}}\n' {version_shell} >{started_shell}
 while kill -0 {os.getpid()} 2>/dev/null; do sleep 1; done
 sleep 1
 UV_NO_PROGRESS=1 {uv_shell} tool install --force {wheel_shell} \\
@@ -645,30 +652,60 @@ exit "$code"
 
 
 def _launch_update_helper(helper: Path) -> None:
+    suffix = helper.stem.removeprefix("install-")
+    started_path = helper.parent / f"started-{suffix}.json"
+
+    def wait_for_start(process: subprocess.Popen[bytes]) -> bool:
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if started_path.is_file():
+                return True
+            if process.poll() is not None:
+                return False
+            time.sleep(0.05)
+        return started_path.is_file()
+
+    def stop_unconfirmed(process: subprocess.Popen[bytes]) -> None:
+        if process.poll() is not None:
+            return
+        process.terminate()
+        try:
+            process.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            process.kill()
+
     try:
+        started_path.unlink(missing_ok=True)
         if sys.platform == "win32":
-            powershell = (
-                shutil.which("powershell.exe") or shutil.which("pwsh.exe") or shutil.which("pwsh")
-            )
-            if not powershell:
+            powershells: list[str] = []
+            for name in ("pwsh.exe", "pwsh", "powershell.exe"):
+                resolved = shutil.which(name)
+                if resolved and resolved not in powershells:
+                    powershells.append(resolved)
+            if not powershells:
                 raise UpdateError("PowerShell is required to finish the Windows self-update.")
-            subprocess.Popen(
-                [
-                    powershell,
-                    "-NoProfile",
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-File",
-                    str(helper),
-                ],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                close_fds=True,
-                creationflags=subprocess.CREATE_NO_WINDOW,
-            )
+            for powershell in powershells:
+                process = subprocess.Popen(
+                    [
+                        powershell,
+                        "-NoProfile",
+                        "-ExecutionPolicy",
+                        "Bypass",
+                        "-File",
+                        str(helper),
+                    ],
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    close_fds=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                )
+                if wait_for_start(process):
+                    return
+                stop_unconfirmed(process)
+            raise UpdateError("The Windows update helper did not start successfully.")
         else:
-            subprocess.Popen(
+            process = subprocess.Popen(
                 ["/bin/sh", str(helper)],
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
@@ -676,6 +713,9 @@ def _launch_update_helper(helper: Path) -> None:
                 close_fds=True,
                 start_new_session=True,
             )
+            if not wait_for_start(process):
+                stop_unconfirmed(process)
+                raise UpdateError("The update helper did not start successfully.")
     except OSError as exc:
         raise UpdateError(f"Could not start the update helper: {exc}") from exc
 

@@ -34,6 +34,19 @@ def test_client_rejects_non_positive_limits() -> None:
         ImageClient(config, max_response_mb=0)
     with pytest.raises(GenerationError, match="cannot be negative"):
         ImageClient(config, connect_retries=-1)
+    with pytest.raises(GenerationError, match="cannot be negative"):
+        ImageClient(config, read_timeout=-1)
+
+
+def test_client_allows_unlimited_generation_read_timeout() -> None:
+    config = ApiConfig(
+        provider="test",
+        api_base="https://relay.example/v1",
+        api_key="test-key",
+        source="test",
+    )
+    client = ImageClient(config, read_timeout=0)
+    assert client.read_timeout == 0
 
 
 def test_client_handles_openai_compatible_base64_response() -> None:
@@ -231,6 +244,61 @@ def test_submitted_connect_error_is_not_retried(monkeypatch: object) -> None:
     with pytest.raises(GenerationError, match="after the image request was submitted") as error:
         ImageClient(config, trust_env=False, connect_retries=3).generate(
             GenerationOptions(model="gpt-image-2", prompt="test"),
+            show_progress=False,
+            progress_callback=lambda event, _details: events.append(event),
+            request_state=request_state,
+        )
+
+    assert calls == 1
+    assert events == ["request_submitted"]
+    assert request_state.request_submitted is True
+    assert error.value.possibly_billed is True
+
+
+def test_submitted_remote_disconnect_is_not_retried(monkeypatch: object) -> None:
+    import httpx
+
+    calls = 0
+    events: list[str] = []
+
+    class DisconnectedStream:
+        def __enter__(self) -> None:
+            request = httpx.Request("POST", "https://relay.example/v1/images/generations")
+            raise httpx.RemoteProtocolError(
+                "Server disconnected without sending a response.", request=request
+            )
+
+        def __exit__(self, *_args: Any) -> None:
+            return
+
+    class FakeClient:
+        def __init__(self, **_kwargs: Any) -> None:
+            return
+
+        def __enter__(self) -> FakeClient:
+            return self
+
+        def __exit__(self, *_args: Any) -> None:
+            return
+
+        def stream(self, _method: str, _url: str, **kwargs: Any) -> DisconnectedStream:
+            nonlocal calls
+            calls += 1
+            kwargs["extensions"]["trace"]("http11.send_request_body.complete", {})
+            return DisconnectedStream()
+
+    monkeypatch.setattr("gpt_image_cli.client.httpx.Client", FakeClient)
+    config = ApiConfig(
+        provider="test",
+        api_base="https://relay.example/v1",
+        api_key="test-key",
+        source="test",
+    )
+    request_state = GenerationRequestState()
+
+    with pytest.raises(GenerationError, match="will not retry automatically") as error:
+        ImageClient(config, trust_env=False, connect_retries=3).generate(
+            GenerationOptions(model="gpt-image-2", prompt="complex diagram"),
             show_progress=False,
             progress_callback=lambda event, _details: events.append(event),
             request_state=request_state,

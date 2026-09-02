@@ -136,7 +136,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--timeout",
         type=float,
         default=1800,
-        help="Read timeout in seconds. Large images can take several minutes.",
+        help="Read timeout in seconds; use 0 to wait indefinitely for complex images.",
     )
     generate.add_argument("--download-timeout", type=float, default=300)
     generate.add_argument("--max-response-mb", type=int, default=150)

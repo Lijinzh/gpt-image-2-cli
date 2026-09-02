@@ -12,6 +12,7 @@ from gpt_image_cli.updater import (
     ReleaseCandidate,
     SourceSpec,
     UpdateArtifact,
+    _launch_update_helper,
     _parse_manifest,
     _verify_wheel,
     automatic_update_notice,
@@ -216,3 +217,26 @@ def test_install_update_schedules_verified_wheel(
     assert result["update_scheduled"] is True
     assert result["version"] == "0.3.0"
     assert launched == [tmp_path / "updates" / "install-update.ps1"]
+
+
+def test_windows_update_helper_requires_start_confirmation(
+    monkeypatch: object, tmp_path: Path
+) -> None:
+    helper = tmp_path / "install-0.3.0-123.ps1"
+    helper.write_text("# helper", encoding="utf-8")
+
+    class FailedProcess:
+        def poll(self) -> int:
+            return 1
+
+    monkeypatch.setattr("gpt_image_cli.updater.sys.platform", "win32")
+    monkeypatch.setattr(
+        "gpt_image_cli.updater.shutil.which",
+        lambda name: "pwsh.exe" if name == "pwsh.exe" else None,
+    )
+    monkeypatch.setattr(
+        "gpt_image_cli.updater.subprocess.Popen", lambda *_args, **_kwargs: FailedProcess()
+    )
+
+    with pytest.raises(UpdateError, match="did not start successfully"):
+        _launch_update_helper(helper)

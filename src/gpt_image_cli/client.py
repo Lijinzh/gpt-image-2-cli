@@ -94,7 +94,6 @@ class ImageClient:
         connect_retries: int = 2,
     ) -> None:
         limits = {
-            "read timeout": read_timeout,
             "connect timeout": connect_timeout,
             "download timeout": download_timeout,
             "response size limit": max_response_mb,
@@ -102,6 +101,8 @@ class ImageClient:
         invalid = [name for name, value in limits.items() if value <= 0]
         if invalid:
             raise GenerationError(f"{invalid[0].capitalize()} must be greater than zero.")
+        if read_timeout < 0:
+            raise GenerationError("Read timeout cannot be negative.")
         self.config = config
         self.read_timeout = read_timeout
         self.connect_timeout = connect_timeout
@@ -203,7 +204,7 @@ class ImageClient:
         payload = options.payload()
         timeout = httpx.Timeout(
             connect=self.connect_timeout,
-            read=self.read_timeout,
+            read=None if self.read_timeout == 0 else self.read_timeout,
             write=60,
             pool=30,
         )

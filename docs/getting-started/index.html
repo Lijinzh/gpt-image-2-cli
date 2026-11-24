@@ -34,14 +34,12 @@
 
       <section id="requirements"><h2>准备环境</h2><p>GPT-Image 2 CLI 支持 Linux、macOS 与 Windows，需要 Python 3.11+ 和 <a href="https://docs.astral.sh/uv/">uv</a>。推荐使用 <code>uv tool</code>，因为它会为 CLI 创建独立环境，也是内置安全自更新能够识别和维护的安装方式。</p><div class="doc-grid"><article class="doc-card"><h3>检查 Python</h3><pre><code>python --version</code></pre><p>版本应为 3.11 或更高。uv 也可以管理所需的 Python 运行时。</p></article><article class="doc-card"><h3>检查 uv</h3><pre><code>uv --version</code></pre><p>如果命令不存在，请先按 uv 官方安装文档完成安装。</p></article></div></section>
 
-      <section id="install"><h2>安装正式 Release</h2><p>正式用户推荐从 GitHub Release 的通用 wheel 安装。wheel 固定到明确版本，便于验证来源，也能让内置更新器确认当前环境由 <code>uv tool</code> 管理。</p><pre><code>uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.6/gpt_image_2_cli-0.2.6-py3-none-any.whl"
+      <section id="install"><h2>安装正式 Release</h2><p>正式用户推荐从 GitHub Release 的通用 wheel 安装。wheel 固定到明确版本，便于验证来源，也能让内置更新器确认当前环境由 <code>uv tool</code> 管理。</p><pre><code>uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.7/gpt_image_2_cli-0.2.7-py3-none-any.whl"
 gpt-image --version</code></pre><p>如果安装成功但终端找不到命令，运行以下命令，然后重新打开终端：</p><pre><code>uv tool update-shell</code></pre><div class="callout"><strong>跨平台提示</strong><p>上面的 <code>uv tool install</code> 命令在 PowerShell、Bash 与 Zsh 中完全相同，不要求管理员权限或 <code>sudo</code>。</p></div><h3>源码版安装</h3><p>需要跟踪 <code>main</code> 最新代码时，也可以从 Git 安装；正式使用仍建议优先采用 Release wheel。</p><pre><code>uv tool install "git+https://github.com/Lijinzh/gpt-image-2-cli.git"</code></pre></section>
 
       <section id="configure"><h2>选择配置来源</h2><h3>方式 A：读取 CC-Switch</h3><p>如果当前用户已使用 CC-Switch 配置 Codex 供应商，CLI 默认只读打开 <code>~/.cc-switch/cc-switch.db</code>，解析当前 Codex 供应商。API Key 不会被复制到项目、终端输出或生成图片。</p><pre><code>gpt-image doctor</code></pre><h3>方式 B：环境变量</h3><p>Linux、CI 或不使用 CC-Switch 的用户，可以直接提供 OpenAI 兼容 API 地址与 Key。为了避免密钥进入 shell 历史，CLI 故意不提供 <code>--api-key</code> 参数。</p><div class="doc-grid"><article class="doc-card"><h3>PowerShell</h3><pre><code>$env:GPT_IMAGE_API_BASE = "https://relay.example/v1"
-$env:GPT_IMAGE_API_KEY = "your-key"
-$env:GPT_IMAGE_MODEL = "gpt-image-2"</code></pre></article><article class="doc-card"><h3>Bash / Zsh</h3><pre><code>export GPT_IMAGE_API_BASE="https://relay.example/v1"
-export GPT_IMAGE_API_KEY="your-key"
-export GPT_IMAGE_MODEL="gpt-image-2"</code></pre></article></div><div class="callout callout--danger"><strong>不要公开凭据</strong><p>不要把真实 Key 粘贴到聊天、Issue、日志、截图或仓库。示例中的 <code>your-key</code> 只是占位符。</p></div></section>
+$env:GPT_IMAGE_API_KEY = "your-key"</code></pre></article><article class="doc-card"><h3>Bash / Zsh</h3><pre><code>export GPT_IMAGE_API_BASE="https://relay.example/v1"
+export GPT_IMAGE_API_KEY="your-key"</code></pre></article></div><div class="callout callout--danger"><strong>不要公开凭据</strong><p>不要把真实 Key 粘贴到聊天、Issue、日志、截图或仓库。示例中的 <code>your-key</code> 只是占位符。</p></div></section>
 
       <section id="doctor"><h2>运行不计费诊断</h2><p><code>doctor</code> 会解析配置、代理和模型列表，不提交图片生成请求。它适合在首次配置、切换供应商或排查网络问题后运行。</p><pre><code>gpt-image doctor</code></pre><p>成功输出会说明配置来源、脱敏后的 API 地址、目标模型是否存在以及代理模式。脚本中可使用稳定 JSON：</p><pre><code>gpt-image doctor --json</code></pre><div class="callout callout--warning"><strong>模型不可用</strong><p>如果连接成功但目标模型不在供应商返回的列表中，<code>doctor</code> 返回退出码 4。可用 <code>--model</code> 检查另一个模型名。</p></div></section>
 

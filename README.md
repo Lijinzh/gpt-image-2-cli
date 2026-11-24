@@ -57,7 +57,7 @@ gpt-image generate "Star Wars 宇宙中的 16-bit 像素艺术场景：Luke Skyw
 
 - 支持 `1024x1024`、`1536x1024`、`1024x1536`，以及 `square`、`landscape`、
   `portrait` 别名。
-- 默认使用 `gpt-image-2`，支持 `quality`、`background` 和一次生成多张图片。
+- 默认使用 `gpt-image-2.6-flare`，支持 `quality`、`background` 和一次生成多张图片。
 - 自动读取 `~/.cc-switch/cc-switch.db` 中当前 Codex 供应商，不复制、不打印 API Key。
 - 也可使用 `GPT_IMAGE_API_BASE` 与 `GPT_IMAGE_API_KEY`，适合 Linux、CI 和其他用户。
 - 兼容 `b64_json`、Base64 data URI、HTTP(S) URL、直接图片响应及简单 SSE 响应。
@@ -80,7 +80,7 @@ gpt-image generate "Star Wars 宇宙中的 16-bit 像素艺术场景：Luke Skyw
 管理，并安全替换整个隔离环境：
 
 ```powershell
-uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.6/gpt_image_2_cli-0.2.6-py3-none-any.whl"
+uv tool install "https://github.com/Lijinzh/gpt-image-2-cli/releases/download/v0.2.7/gpt_image_2_cli-0.2.7-py3-none-any.whl"
 gpt-image --version
 ```
 
@@ -117,6 +117,12 @@ gpt-image update --check --json
 ```powershell
 gpt-image update
 ```
+
+从 0.2.7 起，Windows、Linux 和 macOS 共用 `gpt-image-2.6-flare` 默认值。安装后运行
+`gpt-image --version` 和 `gpt-image doctor`，确认版本以及当前供应商是否列出这个模型。
+要跟随新版默认值，请移除启动环境里固定的 `GPT_IMAGE_MODEL`，并让调用脚本省略
+`--model`。若供应商只支持旧模型，可显式指定 `--model gpt-image-2`。
+脚本和 CI 可显式运行 `gpt-image update`，等后台安装完成并确认版本后再启动生成任务。
 
 默认 `--source auto` 会同时检查已配置的 GitHub、Gitee、GitCode Release。它会选择可获得
 的最高版本；如果同一版本在多个镜像上的 wheel 大小或 SHA-256 不一致，更新会立即停止，
@@ -201,7 +207,6 @@ PowerShell：
 ```powershell
 $env:GPT_IMAGE_API_BASE = "https://relay.example/v1"
 $env:GPT_IMAGE_API_KEY = "your-key"
-$env:GPT_IMAGE_MODEL = "gpt-image-2"
 gpt-image doctor
 ```
 
@@ -210,7 +215,6 @@ Bash：
 ```bash
 export GPT_IMAGE_API_BASE="https://relay.example/v1"
 export GPT_IMAGE_API_KEY="your-key"
-export GPT_IMAGE_MODEL="gpt-image-2"
 gpt-image doctor
 ```
 

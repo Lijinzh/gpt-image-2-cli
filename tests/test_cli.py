@@ -7,6 +7,7 @@ import sys
 import threading
 from pathlib import Path
 
+import pytest
 from packaging.version import Version
 
 from gpt_image_cli.cli import main
@@ -14,13 +15,28 @@ from gpt_image_cli.models import GenerationResult, ImagePayload
 from gpt_image_cli.updater import ReleaseCandidate, UpdateArtifact, UpdateCheck
 
 
+@pytest.mark.parametrize(
+    ("env_model", "cli_model", "expected_model"),
+    [
+        (None, None, "gpt-image-2.6-flare"),
+        ("gpt-image-2", None, "gpt-image-2"),
+        ("gpt-image-2", "gpt-image-2.5-flare", "gpt-image-2.5-flare"),
+    ],
+)
 def test_generate_dry_run_is_machine_readable_and_redacts_key(
     monkeypatch: object,
     capsys: object,
     tmp_path: Path,
+    env_model: str | None,
+    cli_model: str | None,
+    expected_model: str,
 ) -> None:
     monkeypatch.setenv("GPT_IMAGE_API_BASE", "https://relay.example/v1")
     monkeypatch.setenv("GPT_IMAGE_API_KEY", "must-never-be-printed")
+    if env_model is None:
+        monkeypatch.delenv("GPT_IMAGE_MODEL", raising=False)
+    else:
+        monkeypatch.setenv("GPT_IMAGE_MODEL", env_model)
 
     exit_code = main(
         [
@@ -32,6 +48,7 @@ def test_generate_dry_run_is_machine_readable_and_redacts_key(
             str(tmp_path / "result.png"),
             "--dry-run",
             "--json",
+            *(["--model", cli_model] if cli_model is not None else []),
         ]
     )
 
@@ -39,6 +56,7 @@ def test_generate_dry_run_is_machine_readable_and_redacts_key(
     payload = json.loads(captured.out)
     assert exit_code == 0
     assert payload["success"] is True
+    assert payload["parameters"]["model"] == expected_model
     assert payload["parameters"]["size"] == "1536x1024"
     assert "must-never-be-printed" not in captured.out
     assert "must-never-be-printed" not in captured.err

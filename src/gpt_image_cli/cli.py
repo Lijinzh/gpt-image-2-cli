@@ -30,7 +30,7 @@ from .proxy import ProxyConfig, resolve_proxy_config
 from .updater import automatic_update_notice, check_for_updates, install_update
 
 DEFAULT_CC_SWITCH_DB = Path.home() / ".cc-switch" / "cc-switch.db"
-DEFAULT_MODEL = os.getenv("GPT_IMAGE_MODEL", "gpt-image-2")
+DEFAULT_MODEL = "gpt-image-2.6-flare"
 ResultT = TypeVar("ResultT")
 
 
@@ -103,6 +103,7 @@ def _add_connection_arguments(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    default_model = os.getenv("GPT_IMAGE_MODEL", DEFAULT_MODEL)
     parser = argparse.ArgumentParser(
         prog="gpt-image",
         description="Generate and validate GPT-Image output through an OpenAI-compatible relay.",
@@ -114,7 +115,7 @@ def build_parser() -> argparse.ArgumentParser:
         "doctor", help="Resolve credentials and check the relay model list."
     )
     _add_connection_arguments(doctor)
-    doctor.add_argument("--model", default=DEFAULT_MODEL)
+    doctor.add_argument("--model", default=default_model)
     doctor.add_argument("--json", action="store_true", help="Emit machine-readable JSON only.")
 
     generate = subparsers.add_parser("generate", help="Generate one or more images.")
@@ -122,7 +123,7 @@ def build_parser() -> argparse.ArgumentParser:
     generate.add_argument("prompt", nargs="?", help="Text-to-image prompt.")
     generate.add_argument("--prompt-file", type=Path, help="UTF-8 file containing the prompt.")
     generate.add_argument("-o", "--output", type=Path, required=True, help="Output image path.")
-    generate.add_argument("--model", default=DEFAULT_MODEL)
+    generate.add_argument("--model", default=default_model)
     generate.add_argument(
         "--size",
         default="auto",
